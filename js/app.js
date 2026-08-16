@@ -17,6 +17,10 @@ const porDefecto = () => ({
     eliminados: [],  // ids retirados del plan
     orden: null,     // orden explícito de ids (null = orden original)
   },
+  horario: {         // pestaña Horario (oferta del SIA)
+    extras: [],      // códigos añadidos a mano, además de lo marcado como "cursando"
+    grupos: {},      // "código|actividad" -> código del grupo elegido
+  },
 });
 
 let S = cargar();
@@ -26,7 +30,8 @@ function cargar() {
     const raw = localStorage.getItem(CLAVE_LS);
     if (!raw) return porDefecto();
     const g = JSON.parse(raw), d = porDefecto();
-    return Object.assign(d, g, { config: Object.assign(d.config, g.config), mods: Object.assign(d.mods, g.mods) });
+    return Object.assign(d, g, { config: Object.assign(d.config, g.config), mods: Object.assign(d.mods, g.mods),
+      horario: Object.assign(d.horario, g.horario) });
   } catch { return porDefecto(); }
 }
 function guardar() {
@@ -395,6 +400,35 @@ function fichaDe(a) {
   return a.cod ? fichaSIA(a.cod, a.nombre) : null;
 }
 
+/* Oferta del semestre (grupos, horarios, cupos), del Catálogo de asignaturas
+   del SIA. Se genera con herramientas/catalogo-sia.js.                      */
+const OFERTA_MAP = typeof OFERTA === 'object' ? OFERTA : {};
+const OFERTA_SEM = typeof OFERTA_PERIODO === 'string' ? OFERTA_PERIODO : '';
+const codBase = c => String(c || '').split('-')[0].trim();
+const ofertaDe = cod => OFERTA_MAP[codBase(cod)] || null;
+/** Código con el que una asignatura del plan aparece en el SIA (el suyo o el de su optativa). */
+const codDe = a => a.cod || (S.ranuras[a.id] && S.ranuras[a.id].cod) || '';
+const gruposDe = o => o.actividades.reduce((n, x) => n + x.grupos.length, 0);
+const horaTexto = s => `${s.diaTexto.slice(0, 1) + s.diaTexto.slice(1, 3).toLowerCase()} ${s.inicio}–${s.fin}`;
+
+/** Bloque «Oferta del semestre» de la ficha de una asignatura. */
+function panelOferta(cod) {
+  const o = ofertaDe(cod);
+  if (!o) return '';
+  const n = gruposDe(o);
+  const cuerpo = !n
+    ? `<div style="font-size:12.5px;color:var(--texto-2)">Sin grupos programados${o.sinProgramar ? ' (el SIA la marca como «asignatura sin programar»)' : ''}.</div>`
+    : o.actividades.map(act => `
+        ${o.actividades.length > 1 ? `<div style="font-size:12px;color:var(--texto-2);margin:6px 0 2px">${esc(act.nombre)}</div>` : ''}
+        ${act.grupos.map(g => `<div class="g"><b>${esc(g.grupo)}</b>${g.profesores.length ? ` — ${esc(g.profesores.join(', '))}` : ''}
+          <span class="meta"> · ${g.cupos} cupo${g.cupos === 1 ? '' : 's'}${g.jornada && g.jornada !== 'DIURNO' ? ' · ' + esc(g.jornada.toLowerCase()) : ''}</span>
+          <div class="meta">${g.sesiones.length ? g.sesiones.map(x => esc(horaTexto(x)) + (x.salon ? ' · ' + esc(x.salon) : '')).join(' · ') : 'Horario no informado'}</div></div>`).join('')}`).join('');
+  return `<div class="campo"><label>Oferta ${esc(OFERTA_SEM)} en el SIA${n ? ` · ${n} grupo${n === 1 ? '' : 's'}` : ''}</label>
+    <div class="ficha-oferta">${cuerpo}</div>
+    <div style="font-size:11.5px;color:var(--texto-2);margin-top:4px">Consultado el ${esc(typeof OFERTA_CONSULTADO === 'string' ? OFERTA_CONSULTADO : '')}. <a href="#" data-ir="vHorario">Armar horario →</a></div>
+  </div>`;
+}
+
 const LE_URL_PROF = typeof LE_BASE_PROFESOR === 'string'
   ? LE_BASE_PROFESOR : 'https://losestudiantes.com/universidad-nacional/professors/';
 
@@ -688,6 +722,7 @@ function abrirDetalle(id) {
           ${f.contenido ? `<details class="ficha"><summary>Contenido del curso</summary><p>${esc(f.contenido)}</p></details>` : ''}
         </div>`;
       })()}
+      ${panelOferta(codDe(a))}
       ${a.nota ? `<div class="nota-box"><b>⚠ Nota sobre este dato</b>${esc(a.nota)}</div>` : ''}
       ${disp === 'bloqueada' ? `<div class="aviso malo">No puedes inscribirla todavía: faltan ${ev.preFaltantes.map(nom).map(esc).join(', ') || 'requisitos'}.</div>` : ''}
     </div>
@@ -1165,6 +1200,133 @@ function asignarElectiva(cod) {
   if (e) asignarALibreEleccion(e.cod, e.nombre, e.creditos);
 }
 
+/* ----------------------------------------------------------------- horario */
+const DIAS_CORTOS = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const HORA_INI = 6, HORA_FIN = 22;
+const PALETA_HOR = ['#2563c4', '#2f8f5b', '#b8860b', '#8e44ad', '#c0392b', '#16a085', '#d35400', '#7f8c8d', '#c2185b', '#455a64'];
+const minutos = h => { const [a, b] = String(h).split(':').map(Number); return a * 60 + (b || 0); };
+
+/** Asignaturas que entran en el horario: las "cursando" con oferta + las añadidas a mano. */
+function asignaturasHorario() {
+  const vistas = new Set(), out = [];
+  const meter = (cod, origen, asig) => {
+    const o = ofertaDe(cod); const c = codBase(cod);
+    if (!o || vistas.has(c)) return;
+    vistas.add(c);
+    out.push({ cod: c, oferta: o, origen, asig });
+  };
+  PLAN.filter(a => est(a.id) === 'cursando').forEach(a => meter(codDe(a), 'cursando', a));
+  (S.horario.extras || []).forEach(c => meter(c, 'extra', PLAN.find(a => codBase(codDe(a)) === codBase(c)) || null));
+  return out;
+}
+
+/** Grupo elegido para una actividad (o el único, si solo hay uno). */
+function grupoElegido(cod, act) {
+  const clave = cod + '|' + act.nombre;
+  const g = act.grupos.find(x => x.codigoGrupo === S.horario.grupos[clave]);
+  if (g) return g;
+  return act.grupos.length === 1 ? act.grupos[0] : null;
+}
+
+/** Sesiones de todo lo elegido, con sus cruces marcados. */
+function sesionesHorario(items) {
+  const ses = [];
+  items.forEach((it, i) => {
+    const color = it.asig && COMPONENTES[it.asig.comp] ? COMPONENTES[it.asig.comp].color : PALETA_HOR[i % PALETA_HOR.length];
+    it.oferta.actividades.forEach(act => {
+      const g = grupoElegido(it.cod, act);
+      if (!g) return;
+      g.sesiones.forEach(x => {
+        if (!x.dia || !x.inicio || !x.fin) return;
+        ses.push({ cod: it.cod, nombre: it.oferta.nombre, act: act.nombre, grupo: g.grupo, dia: x.dia, ini: minutos(x.inicio), fin: minutos(x.fin), salon: x.salon, color, choque: false });
+      });
+    });
+  });
+  for (let a = 0; a < ses.length; a++) for (let b = a + 1; b < ses.length; b++) {
+    const p = ses[a], q = ses[b];
+    if (p.dia === q.dia && p.ini < q.fin && q.ini < p.fin && !(p.cod === q.cod && p.act === q.act)) p.choque = q.choque = true;
+  }
+  return ses;
+}
+
+function pintarHorario() {
+  const cont = $('#horCont');
+  $('#horPeriodo').textContent = OFERTA_SEM ? `Periodo ${OFERTA_SEM} · consultado el ${typeof OFERTA_CONSULTADO === 'string' ? OFERTA_CONSULTADO : '?'}` : '';
+  if (!Object.keys(OFERTA_MAP).length) {
+    cont.innerHTML = '<div class="hor-vacio">No hay oferta cargada. Genera <code>js/oferta.js</code> con <code>node herramientas/catalogo-sia.js sincronizar</code>.</div>';
+    return;
+  }
+  const items = asignaturasHorario();
+  if (!items.length) {
+    cont.innerHTML = '<div class="hor-vacio">Marca asignaturas como <b>Cursando</b> en la malla o añádelas con el buscador de arriba.</div>';
+    return;
+  }
+  const ses = sesionesHorario(items);
+  const nChoques = ses.filter(x => x.choque).length;
+  const cr = items.reduce((n, it) => n + (it.oferta.creditos || 0), 0);
+  const sinGrupo = items.filter(it => it.oferta.actividades.some(act => act.grupos.length && !grupoElegido(it.cod, act)));
+
+  const lista = items.map((it, i) => {
+    const color = it.asig && COMPONENTES[it.asig.comp] ? COMPONENTES[it.asig.comp].color : PALETA_HOR[i % PALETA_HOR.length];
+    const acts = it.oferta.actividades.length ? it.oferta.actividades.map(act => {
+      const g = grupoElegido(it.cod, act);
+      const clave = it.cod + '|' + act.nombre;
+      const info = g ? `<div class="hor-grupo-info">${g.profesores.length ? esc(g.profesores.join(', ')) + ' · ' : ''}
+          <span class="${g.cupos ? '' : 'cupo0'}">${g.cupos} cupo${g.cupos === 1 ? '' : 's'}</span>
+          ${g.sesiones.length ? ' · ' + g.sesiones.map(x => esc(horaTexto(x)) + (x.salon ? ' ' + esc(x.salon) : '')).join(' · ') : ' · horario no informado'}</div>` : '';
+      return `<div class="hor-act">${it.oferta.actividades.length > 1 ? `<span>${esc(act.nombre)}</span>` : ''}
+        ${act.grupos.length ? `<select data-grupo="${esc(clave)}">
+          ${act.grupos.length > 1 ? `<option value="">— elegir grupo (${act.grupos.length}) —</option>` : ''}
+          ${act.grupos.map(x => `<option value="${esc(x.codigoGrupo)}" ${g && g.codigoGrupo === x.codigoGrupo ? 'selected' : ''}>${esc(x.grupo)}${x.profesores.length ? ' · ' + esc(x.profesores[0]) + (x.profesores.length > 1 ? ' +' + (x.profesores.length - 1) : '') : ''}${x.sesiones.length ? ' · ' + x.sesiones.map(y => esc(DIAS_CORTOS[y.dia] || y.diaTexto) + ' ' + esc(y.inicio)).join(', ') : ''} · ${x.cupos} cupos</option>`).join('')}
+        </select>` : '<span style="color:var(--texto-2)">Sin grupos programados</span>'}${info}</div>`;
+    }).join('') : '<div class="hor-act" style="color:var(--texto-2)">Sin grupos programados este semestre.</div>';
+    return `<div class="hor-item" style="border-left-color:${color}">
+      <header><div><b>${esc(it.oferta.nombre)}</b> <span class="meta">${esc(it.cod)} · ${it.oferta.creditos} cr · ${esc(it.oferta.tipologia)}${it.origen === 'cursando' ? ' · marcada como cursando' : ''}</span></div>
+        <div>${it.asig ? `<a href="#" data-abrir="${esc(it.asig.id)}" style="font-size:12px">ficha</a> ` : ''}${it.origen === 'extra' ? `<button class="quitar" data-quitar-hor="${esc(it.cod)}" title="Quitar del horario">×</button>` : ''}</div></header>
+      ${acts}</div>`;
+  }).join('');
+
+  const horas = []; for (let h = HORA_INI; h < HORA_FIN; h++) horas.push(`<div>${h}:00</div>`);
+  const dias = [1, 2, 3, 4, 5, 6].map(d => {
+    const bloques = ses.filter(x => x.dia === d).map(x => {
+      const top = (x.ini - HORA_INI * 60) / 60, alto = (x.fin - x.ini) / 60;
+      return `<div class="hor-bloque ${x.choque ? 'choque' : ''}" style="top:calc(${top} * var(--hora-alto));height:calc(${alto} * var(--hora-alto) - 2px);background:${x.color}" title="${esc(x.nombre)} · ${esc(x.grupo)}${x.salon ? ' · ' + esc(x.salon) : ''}">
+        <b>${esc(x.nombre)}</b><small>${esc(x.grupo)}${x.salon ? ' · ' + esc(x.salon) : ''}</small></div>`;
+    }).join('');
+    return `<div class="dia" style="height:calc(${HORA_FIN - HORA_INI} * var(--hora-alto))">${bloques}</div>`;
+  }).join('');
+
+  cont.innerHTML = `
+    <div class="hor-resumen">
+      <span><b>${items.length}</b> asignatura${items.length === 1 ? '' : 's'}</span>
+      <span><b>${cr}</b> créditos</span>
+      <span><b>${ses.length}</b> franja${ses.length === 1 ? '' : 's'} semanales</span>
+      ${sinGrupo.length ? `<span>Falta elegir grupo en: ${sinGrupo.map(it => esc(it.oferta.nombre)).join(', ')}</span>` : ''}
+      ${nChoques ? `<span class="hor-choque">⚠ ${nChoques} franja${nChoques === 1 ? '' : 's'} con cruce</span>` : ''}
+    </div>
+    <div class="hor-lista">${lista}</div>
+    ${ses.length ? `<div class="hor-semana">
+      <div class="cab"></div>${[1, 2, 3, 4, 5, 6].map(d => `<div class="cab">${DIAS_CORTOS[d]}</div>`).join('')}
+      <div class="horas">${horas.join('')}</div>${dias}
+    </div>` : ''}`;
+}
+
+/** Sugerencias del buscador de la pestaña Horario. */
+function sugerirHorario() {
+  const q = sinTildes($('#buscaHor').value.trim());
+  const caja = $('#horSugerencias');
+  if (q.length < 2) { caja.hidden = true; caja.innerHTML = ''; return; }
+  const ya = new Set(asignaturasHorario().map(it => it.cod));
+  const res = Object.values(OFERTA_MAP)
+    .filter(o => !ya.has(o.cod) && sinTildes(o.nombre + ' ' + o.cod).includes(q))
+    .sort((a, b) => (gruposDe(b) ? 1 : 0) - (gruposDe(a) ? 1 : 0) || a.nombre.localeCompare(b.nombre, 'es'))
+    .slice(0, 12);
+  caja.innerHTML = res.length
+    ? res.map(o => `<button data-anadir-hor="${esc(o.cod)}">${esc(o.nombre)}<span class="cod">${esc(o.cod)} · ${o.creditos} cr · ${gruposDe(o) ? gruposDe(o) + ' grupo(s)' : 'sin grupos'}</span></button>`).join('')
+    : '<button disabled>Nada en la oferta con ese texto.</button>';
+  caja.hidden = false;
+}
+
 /* ------------------------------------------------------------------- notas */
 function pintarNotas() {
   $('#notasCont').innerHTML = INCONSISTENCIAS.map(n =>
@@ -1178,6 +1340,7 @@ function irA(id) {
   if (id === 'vPlan') pintarPlan();
   if (id === 'vCatalogo') pintarCatalogo();
   if (id === 'vElectivas') pintarElectivas();
+  if (id === 'vHorario') pintarHorario();
 }
 
 function refrescar() {
@@ -1186,6 +1349,7 @@ function refrescar() {
   if (!$('#vPlan').hidden) pintarPlan();
   if (!$('#vCatalogo').hidden) pintarCatalogo();
   if (!$('#vElectivas').hidden) pintarElectivas();
+  if (!$('#vHorario').hidden) pintarHorario();
   const m = metricas();
   $('#progGlobal').style.width = (m.total.hecho / m.total.meta * 100) + '%';
 
@@ -1246,7 +1410,7 @@ function init() {
       return;
     }
     const ir = e.target.closest('[data-ir]');
-    if (ir) { e.preventDefault(); irA(ir.dataset.ir); }
+    if (ir) { e.preventDefault(); if ($('#detalle').open) $('#detalle').close(); irA(ir.dataset.ir); }
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -1274,7 +1438,27 @@ function init() {
   document.addEventListener('click', e => {
     const nueva = e.target.closest('[data-nueva]');
     if (nueva) abrirEditor(null, +nueva.dataset.nueva);
+    const anadirHor = e.target.closest('[data-anadir-hor]');
+    if (anadirHor) {
+      const c = anadirHor.dataset.anadirHor;
+      if (!S.horario.extras.includes(c)) S.horario.extras.push(c);
+      guardar(); $('#buscaHor').value = ''; $('#horSugerencias').hidden = true; pintarHorario();
+      return;
+    }
+    const quitarHor = e.target.closest('[data-quitar-hor]');
+    if (quitarHor) {
+      S.horario.extras = S.horario.extras.filter(c => c !== quitarHor.dataset.quitarHor);
+      guardar(); pintarHorario();
+    }
   });
+  document.addEventListener('change', e => {
+    const sel = e.target.closest('select[data-grupo]');
+    if (!sel) return;
+    if (sel.value) S.horario.grupos[sel.dataset.grupo] = sel.value; else delete S.horario.grupos[sel.dataset.grupo];
+    guardar(); pintarHorario();
+  });
+  $('#buscaHor').addEventListener('input', sugerirHorario);
+  $('#buscaHor').addEventListener('focus', sugerirHorario);
   $('#btnLimpiarResalte').addEventListener('click', () => { resaltado = null; refrescar(); });
   $('#selModo').addEventListener('change', pintarPlan);
   $('#numMax').addEventListener('change', pintarPlan);

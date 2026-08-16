@@ -17,6 +17,9 @@ const SERVICIOS = [
   { nombre: 'Contenido de asignaturas (Bogotá)',
     url: 'https://siabog.unal.edu.co/academia/apoyo-administrativo/ConsultaContenidos.do',
     para: 'créditos, descripción, temario y vigencia — lo que usa herramientas/sia.js' },
+  { nombre: 'Catálogo de asignaturas (ruta /Catalogo/)',
+    url: 'https://sia.unal.edu.co/Catalogo/facespublico/public/servicioPublico.jsf?taskflowId=task-flow-AC_CatalogoAsignaturas',
+    para: 'oferta por plan con grupos, horarios, profesores y cupos — lo que usa herramientas/catalogo-sia.js' },
   { nombre: 'Buscador de cursos',
     url: 'https://sia.unal.edu.co/ServiciosApp/facespublico/public/servicioPublico.jsf?taskflowId=task-flow-AC_BuscadorCursos',
     para: 'grupos, horarios y cupos del semestre — haría falta para armar el horario' },
@@ -61,6 +64,6 @@ async function revisar(s) {
     console.log(`           ${s.para}\n`);
   }
   console.log(algunoCaido
-    ? 'Si el Buscador de cursos aparece como OK, ya se puede intentar traer horarios.'
+    ? 'Los horarios salen del Catálogo (ruta /Catalogo/): si está OK, basta con\n  node herramientas/catalogo-sia.js sincronizar'
     : 'Todo disponible.');
 })();

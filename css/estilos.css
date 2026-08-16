@@ -503,3 +503,46 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
 .cat-item details.ficha > summary { padding: 6px 8px; font-size: 11.5px; }
 .cat-item details.ficha p { font-size: 12px; padding: 8px; max-height: 260px; overflow-y: auto; }
 .cat-grid { align-items: start; }
+
+/* ------------------------------------------------------------ horario ---- */
+.sugerencias { position: relative; margin: -8px 0 12px; background: var(--panel); border: 1px solid var(--borde);
+  border-radius: var(--r); box-shadow: var(--sombra); max-height: 260px; overflow-y: auto; }
+.sugerencias button { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--borde);
+  padding: 8px 12px; font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; }
+.sugerencias button:last-child { border-bottom: 0; }
+.sugerencias button:hover, .sugerencias button:focus { background: var(--panel-2); }
+.sugerencias .cod { color: var(--texto-2); font-size: 11.5px; margin-left: 6px; }
+.hor-lista { display: grid; gap: 10px; margin-bottom: 16px; }
+.hor-item { background: var(--panel); border: 1px solid var(--borde); border-left: 5px solid var(--borde); border-radius: var(--r); padding: 10px 12px; }
+.hor-item header { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.hor-item header b { font-size: 14px; }
+.hor-item header .meta { font-size: 12px; color: var(--texto-2); }
+.hor-item .quitar { background: none; border: 0; color: var(--texto-2); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 4px; }
+.hor-item .quitar:hover { color: #c0392b; }
+.hor-act { margin-top: 8px; font-size: 13px; }
+.hor-act > span { color: var(--texto-2); font-size: 12px; display: block; margin-bottom: 4px; }
+.hor-act select { max-width: 100%; background: var(--panel-2); border: 1px solid var(--borde); border-radius: 7px; padding: 6px 9px; font: inherit; font-size: 13px; color: var(--texto); }
+.hor-grupo-info { font-size: 12px; color: var(--texto-2); margin-top: 4px; }
+.hor-grupo-info .cupo0 { color: #c0392b; font-weight: 700; }
+.hor-resumen { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin: 0 0 12px; color: var(--texto-2); }
+.hor-resumen b { color: var(--texto); }
+.hor-choque { color: #c0392b; font-weight: 700; }
+.hor-semana { display: grid; grid-template-columns: 46px repeat(6, minmax(0, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--borde);
+  border-radius: var(--r); overflow: hidden; font-size: 11.5px; --hora-alto: 34px; --hora-ini: 6; }
+.hor-semana .cab { padding: 6px 4px; text-align: center; font-weight: 650; border-bottom: 1px solid var(--borde); background: var(--panel-2); border-left: 1px solid var(--borde); }
+.hor-semana .cab:first-child { border-left: 0; }
+.hor-semana .horas { position: relative; }
+.hor-semana .horas div { height: var(--hora-alto); border-top: 1px solid var(--borde); color: var(--texto-2); font-size: 10.5px; padding: 1px 3px 0 0; text-align: right; }
+.hor-semana .dia { position: relative; border-left: 1px solid var(--borde); background:
+  repeating-linear-gradient(to bottom, var(--borde) 0 1px, transparent 1px var(--hora-alto)); }
+.hor-bloque { position: absolute; left: 2px; right: 2px; border-radius: 6px; padding: 3px 5px; overflow: hidden; color: #fff; line-height: 1.25;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+.hor-bloque b { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hor-bloque small { display: block; font-size: 10px; opacity: .92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hor-bloque.choque { outline: 2px solid #c0392b; outline-offset: -2px; background-image: repeating-linear-gradient(135deg, rgba(0,0,0,.18) 0 6px, transparent 6px 12px); }
+.hor-vacio { text-align: center; color: var(--texto-2); padding: 30px 10px; font-size: 13.5px; }
+.ficha-oferta { font-size: 12.5px; }
+.ficha-oferta .g { padding: 5px 0; border-top: 1px dashed var(--borde); }
+.ficha-oferta .g:first-child { border-top: 0; }
+.ficha-oferta .g .meta { color: var(--texto-2); font-size: 11.5px; }
+@media (max-width: 720px) { .hor-semana { --hora-alto: 28px; font-size: 10.5px; } .hor-bloque small { display: none; } }

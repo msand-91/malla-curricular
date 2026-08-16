@@ -22,6 +22,7 @@ navegador; desde **Mi avance** puedes exportarlo e importarlo como `.json`.
 | **Plan sugerido** | Genera semestre a semestre lo que queda, con tope de créditos configurable. **Ruta crítica** prioriza aquello de lo que más depende el resto; **Orden de la malla** sigue el semestre sugerido. |
 | **Electivas** | Las 117 electivas de **libre elección** (los 32 créditos), contrastadas una a una con el SIA: vigencia, créditos, descripción. Búsqueda por tema y asignación a cupos con un botón. |
 | **Optativas** | Las 67 optativas con sus **créditos reales**, la descripción y el contenido oficial del SIA, y el profesor mejor calificado de cada una. La búsqueda entra dentro de las descripciones, así que sirve para buscar por tema (*catálisis*, *enzimas*, *nanotubos*). |
+| **Horario** | Arma el horario del semestre con la **oferta real del SIA**: grupos, profesores, salones y cupos. Entran solas las asignaturas marcadas *cursando*; puedes añadir cualquier otra. Eliges grupo y la semana se pinta con los cruces en rojo. |
 | **Notas y fuentes** | Las diferencias entre los dos PDF y qué dato usa la app en cada caso. |
 
 ## Adaptar la malla
@@ -110,10 +111,25 @@ node herramientas/sia.js enriquecer        # cruza la malla y el catálogo → j
 node herramientas/estado-sia.js            # ¿qué servicios están disponibles sin sesión?
 ```
 
-Lo que **no** se puede: oferta del semestre, horarios y cupos. Eso vive en el *Buscador de cursos*,
-que hoy devuelve «AWS Aplicación Fuera de Servicio» para acceso anónimo. Que el SIA te funcione en
-el navegador no contradice esto: tú entras con sesión iniciada. `estado-sia.js` comprueba
-exactamente el acceso anónimo, que es el único que estas herramientas pueden usar.
+### Oferta del semestre: grupos, horarios y cupos
+
+El *Buscador de cursos* sigue en mantenimiento, pero el **Catálogo de asignaturas** en su ruta
+nueva (`sia.unal.edu.co/Catalogo/…`) sí responde sin sesión y trae, por plan y tipología, cada
+asignatura con sus grupos, profesores, horarios, salones y cupos. De ahí sale `js/oferta.js`,
+que alimenta la pestaña **Horario** y el bloque «Oferta en el SIA» de cada ficha.
+
+```bash
+node herramientas/catalogo-sia.js plan             # las 84 asignaturas del plan 2519 (sin libre elección)
+node herramientas/catalogo-sia.js ver <código>     # grupos y horarios de una
+node herramientas/catalogo-sia.js libre [plan]     # libre elección: componente 2CLE de la sede, o de un plan
+node herramientas/catalogo-sia.js sincronizar      # descarga todo → js/oferta.js (unos 10 min)
+```
+
+Es una aplicación Oracle ADF sin URLs por asignatura; el script reproduce sus peticiones parciales
+(POST con `Adf-Window-Id=winnoloop`, ViewState encadenado, sesión por cookie) sin necesitar Chrome.
+Los detalles no obvios están comentados en la cabecera del script. Los cupos son los del día de la
+consulta; conviene resincronizar cerca de la inscripción. Como el resto: acceso anónimo, **nunca
+se piden credenciales**.
 
 Los códigos `1000xxx` (Cálculo Diferencial, Química Orgánica I…) no tienen ficha en este catálogo:
 aparecen como registros vacíos. No significa que no existan, solo que su contenido no está
@@ -151,9 +167,11 @@ libre elección.
 - [js/app.js](js/app.js) — motor de prerrequisitos, planificador, editor de malla y renderizado
 - [js/losestudiantes.js](js/losestudiantes.js) — generado; código SIA → materia, profesores y reseñas
 - [js/sia.js](js/sia.js) — generado; fichas oficiales (créditos, descripción, temario)
+- [js/oferta.js](js/oferta.js) — generado; oferta del semestre (grupos, horarios, profesores, cupos)
 - [herramientas/verificar-losestudiantes.js](herramientas/verificar-losestudiantes.js) — códigos y enlaces
 - [herramientas/sincronizar-profesores.js](herramientas/sincronizar-profesores.js) — profesores y reseñas
 - [herramientas/sia.js](herramientas/sia.js) — catálogo oficial de asignaturas
+- [herramientas/catalogo-sia.js](herramientas/catalogo-sia.js) — oferta del semestre desde el Catálogo de asignaturas
 - [herramientas/estado-sia.js](herramientas/estado-sia.js) — disponibilidad de los servicios públicos
 - [herramientas/empaquetar.js](herramientas/empaquetar.js) — genera los archivos de `dist/`
 - [css/estilos.css](css/estilos.css) — estilos (tema claro/oscuro)
@@ -169,6 +187,7 @@ libre elección.
 - **losestudiantes.com** — profesores, calificaciones y reseñas; además sirvió como tercera fuente
   para verificar códigos.
 - **Catálogo público del SIA Bogotá** — créditos, descripción y temario oficiales.
+- **Catálogo de asignaturas del SIA** — oferta del semestre: grupos, horarios, profesores y cupos.
 
 Los dos PDF no coinciden en varios códigos. La pestaña **Notas y
 fuentes** lista cada diferencia y el criterio aplicado. **Confirma siempre en el

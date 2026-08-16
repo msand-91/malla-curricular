@@ -24,6 +24,7 @@
   <button data-vista="vPlan"      role="tab" aria-selected="false">Plan sugerido</button>
   <button data-vista="vCatalogo"  role="tab" aria-selected="false">Optativas</button>
   <button data-vista="vElectivas" role="tab" aria-selected="false">Electivas</button>
+  <button data-vista="vHorario"   role="tab" aria-selected="false">Horario</button>
   <button data-vista="vNotas"     role="tab" aria-selected="false">Notas y fuentes</button>
 </nav>
 <div class="barra-progreso-global"><div id="progGlobal" style="width:0%"></div></div>
@@ -148,6 +149,22 @@
     <div id="eleCont"></div>
   </section>
 
+  <!-- ============================== HORARIO ============================ -->
+  <section class="vista" id="vHorario" hidden>
+    <div class="toolbar">
+      <input type="search" id="buscaHor" placeholder="Añadir asignatura por nombre o código…" autocomplete="off">
+      <span id="horPeriodo" style="font-size:12.5px;color:var(--texto-2)"></span>
+    </div>
+    <div id="horSugerencias" class="sugerencias" hidden></div>
+    <div class="aviso" id="horAviso">
+      Aquí armas el horario del semestre con la <b>oferta real del SIA</b> (grupos, profesores, salones y
+      cupos). Entran solas las asignaturas que marques como <b>Cursando</b> en la malla; también puedes
+      añadir cualquier otra con el buscador. Elige un grupo por asignatura y la semana se pinta abajo;
+      los cruces se marcan en rojo. Los cupos son los del día de la consulta.
+    </div>
+    <div id="horCont"></div>
+  </section>
+
   <!-- ============================== NOTAS ============================== -->
   <section class="vista" id="vNotas" hidden>
     <div class="panel" style="margin-bottom:16px">
@@ -158,7 +175,10 @@
         <b>Malla completa.pdf</b> — «Tu malla curricular de confianza», Grupos de Estudio Autónomo
         (grafo de dependencias, códigos faltantes y catálogo completo de optativas).<br>
         <b>losestudiantes.com</b> — tercera fuente, usada para verificar los códigos y para
-        enlazar cada asignatura con sus profesores y reseñas.
+        enlazar cada asignatura con sus profesores y reseñas.<br>
+        <b>Catálogo de asignaturas del SIA</b> — oferta del semestre: grupos, profesores, horarios,
+        salones y cupos (pestaña <i>Horario</i> y ficha de cada asignatura). Es el acceso público,
+        sin sesión; se actualiza con <code>node herramientas/catalogo-sia.js sincronizar</code>.
       </p>
     </div>
     <div class="panel" style="margin-bottom:16px">
@@ -191,6 +211,7 @@
 <script src="js/losestudiantes.js"></script>
 <script src="js/sia.js"></script>
 <script src="js/electivas.js"></script>
+<script src="js/oferta.js"></script>
 <script src="js/datos.js"></script>
 <script src="js/app.js"></script>
 </body>

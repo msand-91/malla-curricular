@@ -14,6 +14,7 @@ w.onerror = (m) => errores.push('window.onerror: ' + m);
 const src = fs.readFileSync(dir + '/js/losestudiantes.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/sia.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/electivas.js', 'utf8') + '\n'
+  + fs.readFileSync(dir + '/js/oferta.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
 w.eval(src + '\n;window.__api = { get S(){return S}, get PLAN(){return PLAN},'
   + ' get PLAN_POR_ID(){return PLAN_POR_ID}, CATALOGO, guardar, refrescar, construirPlan,'
@@ -324,6 +325,41 @@ $('[data-vista="vMalla"]').dispatchEvent(new w.MouseEvent('click', { bubbles: tr
 chk($('#detalle').textContent.includes('malla impresa la pone en el semestre IV'),
     'la ficha avisa donde la ubica la malla impresa');
 $('#detalle').close();
+
+console.log('\n[V] Horario con la oferta del SIA');
+w.__api.S.estado = {}; w.__api.S.horario = { extras: [], grupos: {} }; w.__api.guardar(); w.__api.refrescar();
+$('[data-vista="vHorario"]').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+chk(!$('#vHorario').hidden, 'la pestaña Horario se abre');
+chk($('#horCont').textContent.includes('Cursando'), 'sin nada marcado, pide marcar asignaturas como cursando');
+// Química Estructural (2015599) tiene oferta con varios grupos
+w.__api.S.estado['2015599'] = 'cursando'; w.__api.guardar(); w.__api.refrescar();
+chk($$('#horCont .hor-item').length === 1, `una asignatura en el horario (hay ${$$('#horCont .hor-item').length})`);
+const selHor = $('#horCont select[data-grupo]');
+chk(!!selHor && selHor.options.length >= 2, 'ofrece los grupos de Química Estructural');
+if (selHor) {
+  selHor.value = selHor.options[1].value;
+  selHor.dispatchEvent(new w.Event('change', { bubbles: true }));
+  chk($$('#horCont .hor-bloque').length >= 1, `al elegir grupo se pintan bloques en la semana (${$$('#horCont .hor-bloque').length})`);
+  chk(w.__api.S.horario.grupos['2015599|' + Object.keys(w.__api.S.horario.grupos)[0].split('|')[1]] === selHor.value, 'el grupo elegido se guarda');
+}
+// añadir una extra por el buscador
+$('#buscaHor').value = 'álgebra lineal';
+$('#buscaHor').dispatchEvent(new w.Event('input', { bubbles: true }));
+const sug = $('#horSugerencias button[data-anadir-hor]');
+chk(!!sug, 'el buscador sugiere Álgebra Lineal');
+if (sug) {
+  sug.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  chk($$('#horCont .hor-item').length === 2, 'la asignatura añadida aparece en el horario');
+  chk(w.__api.S.horario.extras.length === 1, 'y queda guardada como extra');
+  $('#horCont [data-quitar-hor]').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  chk($$('#horCont .hor-item').length === 1, 'se puede quitar');
+}
+// la ficha muestra la oferta
+$('[data-vista="vMalla"]').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+[...$$('#malla .card')].find(c => c.dataset.id === '2015599').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+chk($('#detalle').textContent.includes('Oferta') && $('#detalle').textContent.includes('Grupo 1'), 'la ficha muestra los grupos del SIA');
+$('#detalle').close();
+w.__api.S.estado = {}; w.__api.S.horario = { extras: [], grupos: {} }; w.__api.guardar(); w.__api.refrescar();
 
 console.log('\n' + (errores.length ? `✗ ${errores.length} FALLA(S)` : '✓ TODAS LAS COMPROBACIONES PASAN'));
 process.exit(errores.length ? 1 : 0);

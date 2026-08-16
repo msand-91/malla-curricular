@@ -11,6 +11,7 @@ vm.createContext(ctx);
 const fuente = fs.readFileSync(dir + '/js/losestudiantes.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/sia.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/electivas.js', 'utf8') + '\n'
+  + fs.readFileSync(dir + '/js/oferta.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/datos.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/app.js', 'utf8')
       .replace("document.addEventListener('DOMContentLoaded', init);", '')

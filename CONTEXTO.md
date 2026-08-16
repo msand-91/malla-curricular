@@ -45,7 +45,8 @@ de la Universidad — **incluidas optativas que se cursen de más**.
 |---|---|---|
 | `malla_oficial.pdf` (Facultad de Ciencias) | Semestres, créditos, prerrequisitos | Autoritativo, pero con erratas |
 | `malla_apoyo.pdf` (Grupos de Estudio Autónomo) | Grafo de dependencias, códigos faltantes, catálogo de optativas | Complementario, con erratas propias |
-| **SIA público** (`siabog.unal.edu.co`) | Créditos reales, descripción, temario, vigencia, planes relacionados | Autoritativo. Solo funciona «Contenido de asignaturas» |
+| **SIA público** (`siabog.unal.edu.co`) | Créditos reales, descripción, temario, vigencia, planes relacionados | Autoritativo. «Contenido de asignaturas» (a veces da 502) |
+| **Catálogo de asignaturas del SIA** (`sia.unal.edu.co/Catalogo/…`) | Oferta del semestre: grupos, profesores, horarios, salones, cupos, por plan y tipología | Autoritativo. Es ADF; se consulta con `herramientas/catalogo-sia.js` |
 | **losestudiantes.com** | Profesores por materia, calificación, nota promedio, una reseña pública | De terceros, útil como contraste |
 
 Los dos PDF **se contradicen en varios códigos**. Todas las diferencias están documentadas en
@@ -86,13 +87,14 @@ la malla impresa, y lo muestran en su ficha.
 ## Estructura del código
 
 ```
-index.html                     estructura de la interfaz (6 pestañas)
+index.html                     estructura de la interfaz (7 pestañas)
 css/estilos.css                estilos, tema claro/oscuro, responsive
 js/datos.js                    PLAN_BASE, CATALOGO (67 optativas), INCONSISTENCIAS  [a mano]
 js/app.js                      motor de prerrequisitos, planificador, editor, UI
 js/sia.js                      77 fichas del SIA (75 con descripción)          [generado]
 js/losestudiantes.js           83 materias, 306 profesores, 273 con reseña     [generado]
 js/electivas.js                117 electivas de libre elección (116 vigentes)  [generado]
+js/oferta.js                   oferta del semestre: plan 2519 + libre elección 2CLE, con grupos y horarios  [generado]
 datos/electivas-listado.txt    listado copiado a mano del Departamento de Electivas
 herramientas/*.js              scripts de línea de comandos (ver abajo)
 tests/logica.test.js           integridad de datos + validación del planificador
@@ -107,6 +109,8 @@ dist/*.html                    dos paquetes autocontenidos (~1 MB)
 ```bash
 node herramientas/estado-sia.js                    # ¿qué servicios del SIA responden?
 node herramientas/sia.js <código|texto>            # consultar el catálogo del SIA
+node herramientas/catalogo-sia.js sincronizar      # oferta del semestre (grupos, horarios, cupos) → js/oferta.js
+node herramientas/catalogo-sia.js ver <código>     # grupos y horarios de una asignatura
 node herramientas/verificar-losestudiantes.js      # códigos y enlaces
 node herramientas/sincronizar-profesores.js        # profesores (necesita Chrome headless)
 node herramientas/sincronizar-profesores.js --fichas  # solo calificaciones y reseñas (fetch)
@@ -133,9 +137,13 @@ el tope de créditos y cubra todas las asignaturas.
 
 ## Límites conocidos
 
-- **No hay horarios.** El *Buscador de cursos* del SIA (grupos, franjas, salones, cupos) lleva
-  semanas en mantenimiento. Sin él no se puede armar un planificador de horario tipo BetterCampus.
-  Comprobar con `node herramientas/estado-sia.js`.
+- **Los horarios ya están (agosto 2026), pero cacheados.** El *Buscador de cursos* sigue en
+  mantenimiento, pero el *Catálogo de asignaturas* en la ruta `/Catalogo/` responde sin sesión y
+  trae grupos, profesores, horarios, salones y cupos. `herramientas/catalogo-sia.js` lo consulta
+  reproduciendo las peticiones ADF (claves: `Adf-Window-Id=winnoloop`, POST a la ruta sin
+  `;PortalJSESSION`, ViewState encadenado, User-Agent que NO sea de navegador o ADF devuelve una
+  página «loopback»). Los cupos son los del día de la sincronización. La pestaña **Horario** usa
+  esos datos: asignaturas «cursando» + añadidas a mano, un grupo por actividad, semana con cruces.
 - **No hay conexión en vivo con el SIA ni con losestudiantes.** Ninguno envía cabeceras CORS,
   así que el navegador bloquea cualquier consulta desde la página — y más aún desde `file://`.
   Todos los datos externos se traen desde la línea de comandos y quedan cacheados en archivos `.js`.
