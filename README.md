@@ -22,7 +22,7 @@ navegador; desde **Mi avance** puedes exportarlo e importarlo como `.json`.
 | **Plan sugerido** | Genera semestre a semestre lo que queda, con tope de créditos configurable. **Ruta crítica** prioriza aquello de lo que más depende el resto; **Orden de la malla** sigue el semestre sugerido. |
 | **Electivas** | Las 117 electivas de **libre elección** (los 32 créditos), contrastadas una a una con el SIA: vigencia, créditos, descripción. Búsqueda por tema y asignación a cupos con un botón. |
 | **Optativas** | Las 67 optativas con sus **créditos reales**, la descripción y el contenido oficial del SIA, y el profesor mejor calificado de cada una. La búsqueda entra dentro de las descripciones, así que sirve para buscar por tema (*catálisis*, *enzimas*, *nanotubos*). |
-| **Horario** | Arma el horario del semestre con la **oferta real del SIA**: grupos, profesores, salones y cupos. Entran solas las asignaturas marcadas *cursando*; puedes añadir cualquier otra. Eliges grupo y la semana se pinta con los cruces en rojo. |
+| **Horario** | Arma el horario del semestre con la **oferta real del SIA**: grupos, profesores, salones y cupos. Entran solas las asignaturas marcadas *cursando*; puedes añadir cualquier otra. Eliges grupo y la semana se pinta con los cruces en rojo. **¿Qué cabe en mis huecos?** busca en toda la oferta los grupos que no se cruzan con tu horario (obligatorias del plan disponibles, optativas del catálogo y libre elección), con filtros de tipo, créditos y cupos, y los añade con un clic. |
 | **Notas y fuentes** | Las diferencias entre los dos PDF y qué dato usa la app en cada caso. |
 
 ## Adaptar la malla
