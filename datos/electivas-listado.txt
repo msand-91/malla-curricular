@@ -1,0 +1,365 @@
+# Listado del Departamento de Electivas de losestudiantes.com
+# Copiado a mano el 2026-07-25 (la página no permite leerlo automáticamente:
+# declara 120 materias pero solo entrega 18 sin sesión iniciada).
+# Formato: una línea con el nombre y la siguiente con "código - N Archivos".
+# Ampliar con: node herramientas/electivas.js importar
+
+Agujeros Negros Y Maquinas Del Tiempo
+2024279 - 0 Archivos
+
+Amazonia Y Otras Selvas Ecuatoriales: Conflic...
+2022160 - 0 Archivos
+
+Amenaza, Riesgo Y Desarrollo
+2021514 - 0 Archivos
+
+Analisis Y Propuestas Hacia El Cierre Del Con...
+2026973 - 0 Archivos
+
+Antonio Gramsci: Hegemonia, Autonomia Y Subal...
+2026225 - 0 Archivos
+
+Antonio Gramsci: Subalternidad, Hegemonia Y A...
+2027248 - 0 Archivos
+
+Antropología Económica
+2028459 - 0 Archivos
+
+Apreciacion E Historia Del Arte: Siglo Xx
+2026070 - 1 Archivo
+
+Apreciacion E Hstoria Del Arte: Del Barroco A...
+2026433 - 0 Archivos
+
+Apreciación musical
+2016131 - 0 Archivos
+
+Arbitraje Internacional Uno De Los Mecanismos...
+2027032 - 0 Archivos
+
+Argumentacion
+2025478 - 0 Archivos
+
+Asignatura Por Convenio Con Universidad De Lo...
+2024944 - 0 Archivos
+
+Asignatura Por Convenio Con Universidad De Lo...
+2011302 - 0 Archivos
+
+Asignatura Por Convenio Con Universidad De Lo...
+2024945 - 0 Archivos
+
+Asignatura Por Convenio Con Universidad De Lo...
+2012698 - 0 Archivos
+
+Asignatura Posgrado Otra Sede De La U Nal
+2024941 - 0 Archivos
+
+Astronomia Para Todos
+2021140 - 11 Archivos
+
+Beatles y algo más: música, cultura y socieda...
+2026533 - 2 Archivos
+
+Biologia Del Comportamiento Animal Y Humano
+2021146 - 2 Archivos
+
+Biotecnologia Para No Biotecnologos
+2021147 - 3 Archivos
+
+Catedra Augusto Angel Maya
+2022287 - 2 Archivos
+
+Catedra De Derecho Para Estudiantes De Otras ...
+2021770 - 1 Archivo
+
+Cátedra de Fronteras
+1000127 - 1 Archivo
+
+Cátedra de Gestión y Organizaciones
+2027992 - 0 Archivos
+
+Catedra De Induccion Un: Conoce, Vive Y Compa...
+2026972 - 1 Archivo
+
+Catedra Gabriel Garcia Marquez: Imagen, Comun...
+2027291 - 2 Archivos
+
+Cátedra Hipatia
+2028564 - 0 Archivos
+
+Catedra Ingenio, Ciencia, Tecnologia Y Socied...
+2026257 - 1 Archivo
+
+Catedra Jorge Eliecer Gaitan: Recursos Minero...
+2027088 - 0 Archivos
+
+Catedra Jorge Eliecer Gaitan: Una Vision Crit...
+2027292 - 0 Archivos
+
+Catedra Jose Celestino Mutis: Catedra Del Mar
+2027290 - 0 Archivos
+
+Catedra Jose Celestino Mutis: Ingenio, Cienci...
+2027073 - 1 Archivo
+
+Catedra Manuel Ancizar: 25 Años De La Constit...
+2027293 - 0 Archivos
+
+Catedra Manuel Ancizar: Camilo Torres: Su Obr...
+2027063 - 0 Archivos
+
+Catedra Marta Traba: El Espacio Abierto Y Pub...
+2027136 - 0 Archivos
+
+Catedra Marta Traba: Tensiones Y Rupturas En ...
+2027296 - 0 Archivos
+
+Cátedra nacional de inducción y preparación p...
+1000089-B - 11 Archivos
+
+Cátedra Nacional en Transición Energética: ap...
+1000147-B - 1 Archivo
+
+Cátedra nacional: Rayos de sol para días de l...
+1000100-B - 3 Archivos
+
+Cátedra Pinsus Julio Carrizosa
+2028643 - 1 Archivo
+
+Catedra Turca: Historia Y Cultura Ii
+2026795 - 0 Archivos
+
+Cátedra Universitaria Jorge Eliecer Gaitán: p...
+2029344 - 4 Archivos
+
+Ciencia, Tecnologia Y Desarrollo
+2021141 - 0 Archivos
+
+Ciencias Forenses Y Medicina Veterinaria Lega...
+2027064 - 0 Archivos
+
+Ciudad Y Medio Ambiente Sustentable
+2016142 - 2 Archivos
+
+Ciudad, Habitat Y Vivienda
+2016133 - 1 Archivo
+
+Ciudad, Territorio Y Complejidad
+2016141 - 0 Archivos
+
+Ciudades, Geopolitica Y Relaciones Internacio...
+2027082 - 3 Archivos
+
+Clima Y Diversidad De Clima De Colombia
+2021142 - 9 Archivos
+
+Comunicacion En Salud
+2025337 - 0 Archivos
+
+Contexto Socioeconomico De La Salud
+2027146 - 0 Archivos
+
+Convenio Sigueme
+2011303 - 0 Archivos
+
+Corea A Traves De Sus Religiones, Historia Y ...
+1000083 - 0 Archivos
+
+Corea Contemporanea: Su Marca Pais Y Las Pers...
+1000085 - 0 Archivos
+
+Corea En El Escenario Regional Del Este De As...
+1000086 - 0 Archivos
+
+Cultivos Transgenicos: Frankenstein O Promete...
+2021153 - 0 Archivos
+
+Cultura Moderna Del K-Pop (Curso En Ingles)
+1000082 - 0 Archivos
+
+Curso De Contexto: El Sistema De Salud En Col...
+2024460 - 0 Archivos
+
+Derecho, ordenamiento territorial y urbanismo
+2028615 - 0 Archivos
+
+Desarrollo De La Ingenieria En Colombia
+2025976 - 5 Archivos
+
+Desarrollo Economico Y Corporaciones En Corea...
+1000084 - 0 Archivos
+
+diplomado liderazgo femenino
+Ingenieria - 0 Archivos
+
+El Habitat, El Entorno De Lo Urbano, La Salud...
+2016135 - 0 Archivos
+
+El Sida Como Realidad Del Proceso Vital Human...
+2024990 - 0 Archivos
+
+Electiva En Lengua Coreana I
+2025336 - 4 Archivos
+
+Electiva En Lengua Coreana Ii
+2025814 - 0 Archivos
+
+Electiva Turco Ii
+2026794 - 0 Archivos
+
+En el Interregno del Romanticismo y la Ilustr...
+2027941 - 0 Archivos
+
+Fiestas Populares, Carnaval, Sociedad Y Arte ...
+2024999 - -1 Archivos
+
+Galileo
+2021149 - 0 Archivos
+
+Grafica Interactiva
+1000075 - 1 Archivo
+
+Hacía dónde vamos? Visiones sobre el futuro d...
+2029505 - 0 Archivos
+
+Historia De Las Ideas Politicas
+2025677 - 0 Archivos
+
+Huellas Que Inspiran
+2026245 - 0 Archivos
+
+Ingles Intensivo I (Intensive English I)
+2026054 - 14 Archivos
+
+Innovación y creatividad del mercadeo
+2024240 - 2 Archivos
+
+Inteligencia Artificial para Médicos
+2028496 - 0 Archivos
+
+Intercambio Academico Internacional
+2011183 - 0 Archivos
+
+Intercambio Academico Internacional - Ii
+2026630 - 0 Archivos
+
+Intercambio Academico Internacional - Ii Pror...
+2026631 - 0 Archivos
+
+Intercambio Academico Internacional Posgrado
+2024937 - 0 Archivos
+
+Intercambio Academico Internacional Posgrado ...
+2024938 - 0 Archivos
+
+Intercambio Academico Internacional Prorroga
+2014269 - 0 Archivos
+
+Intercambio Academico Nacional Estudiante De ...
+2024946 - 0 Archivos
+
+Intercambio Academico Nacional Estudiante De ...
+2011283 - 0 Archivos
+
+Intercambio Academico Nacional Estudiante De ...
+2014290 - 0 Archivos
+
+Intercambio Academico Otras Sedes Unal
+2011170 - 0 Archivos
+
+Intercambio Academico Otras Sedes Unal Prorro...
+2013967 - 0 Archivos
+
+International Business
+2027546 - 0 Archivos
+
+Introduccion a la astronomia
+2023216 - 2 Archivos
+
+Introduccion A La Cultura Coreana
+2025053 - 2 Archivos
+
+Introduccion A Los Estudios Urbanos
+2016136 - 0 Archivos
+
+Introduccion A Los Indicadores Economicos-Soc...
+2016137 - 0 Archivos
+
+ITALIANO TRADUCCIÓN E INTERPRETACIÓN
+2029606 - 0 Archivos
+
+Javier Tovar Benavides
+Recibo - 0 Archivos
+
+Las Artes en América Latina: Orígenes y Tradi...
+2028188 - 0 Archivos
+
+Las Ciudades De Oriente: El Desarrollo Urbano...
+1000087 - 0 Archivos
+
+Lecto-Escritura
+1000002 - 0 Archivos
+
+Meritocracia: Reflexion Critica Y Prospectiva...
+2026679 - 0 Archivos
+
+Movilidad Y Transporte Urbano
+2022225 - 2 Archivos
+
+Museos
+2021515 - 1 Archivo
+
+Museos: Academia Y Sociedad
+2026539 - 0 Archivos
+
+Musica Y Sociedad En Colombia
+2016139 - 1 Archivo
+
+Objetos astrofísicos
+2023217 - 22 Archivos
+
+Partículas y cosmología
+2021160 - 2 Archivos
+
+Problemas Ambientales Urbanos
+2024072 - 0 Archivos
+
+Procesos De Postconflicto Y Construccion De P...
+2026991 - 0 Archivos
+
+Process Synthesis, Optimization And Control -...
+2026813 - 0 Archivos
+
+Recursos Geneticos: Aspectos Tecnicos Y Jurid...
+2025691 - 0 Archivos
+
+Reflexiones En Torno Al Proceso De Envejecimi...
+2025151 - 0 Archivos
+
+Relaciones Internacionales Para No Politologo...
+2024063 - 0 Archivos
+
+Relaciones Transpacificas: Vinculos Historico...
+1000081 - 0 Archivos
+
+Riesgos De Origen Hidrometeorologico En Colom...
+2026311 - 1 Archivo
+
+Seminario: Ciudades, Industrias Y Cadenas Mer...
+2026834 - 1 Archivo
+
+Sensibilidad Y Pensamiento Cinematografico
+2024124 - 1 Archivo
+
+Siglo Veinte: Pensamiento. Arte. Poeticas
+2026106 - 0 Archivos
+
+Situacion Del Derecho A La Seguridad Alimenta...
+2024461 - 0 Archivos
+
+Suficiencia En Lengua Extranjera
+1000074 - 0 Archivos
+
+xxx
+matexxx - 0 Archivos
