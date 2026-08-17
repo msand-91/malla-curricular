@@ -1,13 +1,13 @@
 {
-  "name": "malla-curricular-quimica",
+  "name": "mallas-unal",
   "version": "1.0.0",
   "private": true,
-  "description": "Malla curricular interactiva del pregrado en Química, UNAL Sede Bogotá",
+  "description": "Mallas curriculares interactivas de pregrados de la UNAL Sede Bogotá (Química, Biología, Sistemas)",
   "scripts": {
-    "test": "node tests/logica.test.js && node tests/ui.test.js",
-    "verificar": "node herramientas/verificar-losestudiantes.js --catalogo",
+    "test": "node tests/correr.js",
+    "generar": "node herramientas/generar.js",
     "profesores": "node herramientas/sincronizar-profesores.js",
-    "empaquetar": "node herramientas/empaquetar.js"
+    "empaquetar": "for c in quimica biologia sistemas; do node herramientas/empaquetar.js --carrera=$c; done"
   },
   "devDependencies": {
     "jsdom": "^26.0.0",

@@ -9,7 +9,7 @@
    cuerpo y <script>. Sin html/head/body propios y sin archivos externos
    (la publicación bloquea cualquier petición a otro servidor).
 
-   Uso:  node herramientas/empaquetar.js  ->  dist/malla-quimica.html
+   Uso:  node herramientas/empaquetar.js --carrera=<slug>  ->  dist/malla-<slug>.html
    ========================================================================== */
 'use strict';
 
@@ -17,15 +17,19 @@ const fs = require('fs');
 const path = require('path');
 
 const RAIZ = path.resolve(__dirname, '..');
+const { resolverCarrera } = require('./_carrera');
+const { slug: SLUG } = resolverCarrera();
 /* Para publicar: solo el contenido, sin html/head/body (los pone la plataforma). */
-const SALIDA = path.join(RAIZ, 'dist/malla-quimica.html');
+const SALIDA = path.join(RAIZ, `dist/malla-${SLUG}.html`);
 /* Para mandar por chat o copiar al celular: documento completo, con viewport.
    Sin la etiqueta viewport el móvil lo renderiza a ancho de escritorio. */
-const SALIDA_SUELTA = path.join(RAIZ, 'dist/malla-quimica-autonoma.html');
+const SALIDA_SUELTA = path.join(RAIZ, `dist/malla-${SLUG}-autonoma.html`);
+const PAGINA = path.join(RAIZ, SLUG, 'index.html');   // generada por herramientas/generar.js
 
-const leer = p => fs.readFileSync(path.join(RAIZ, p), 'utf8');
+// Las rutas del index son relativas a <slug>/ (../css/…, ../carreras/…).
+const leer = p => fs.readFileSync(path.join(RAIZ, SLUG, p), 'utf8');
 
-const html = leer('index.html');
+const html = fs.readFileSync(PAGINA, 'utf8');
 
 /* --- Título y cuerpo del index --------------------------------------------- */
 const titulo = (html.match(/<title>([^<]*)<\/title>/) || [, 'Malla Curricular'])[1];

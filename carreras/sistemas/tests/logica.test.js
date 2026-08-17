@@ -1,5 +1,7 @@
 const fs = require('fs'), vm = require('vm');
-const dir = require('path').resolve(__dirname, '..');
+const dir = require('path').resolve(__dirname, '../../..');   // raíz del repositorio
+const cdir = require('path').resolve(__dirname, '..');        // carreras/<slug>
+const slug = require('path').basename(cdir);
 const store = {};
 const ctx = {
   console,
@@ -8,11 +10,12 @@ const ctx = {
 };
 vm.createContext(ctx);
 // datos.js + app.js deben compartir un mismo ámbito léxico: se concatenan.
-const fuente = fs.readFileSync(dir + '/js/losestudiantes.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/sia.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/electivas.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/oferta.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/datos.js', 'utf8') + '\n'
+const fuente = fs.readFileSync(cdir + '/carrera.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/losestudiantes.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/sia.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/electivas.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/oferta.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/datos.js', 'utf8') + '\n'
   + fs.readFileSync(dir + '/js/app.js', 'utf8')
       .replace("document.addEventListener('DOMContentLoaded', init);", '')
   + '\n;construirPlan();'
@@ -37,11 +40,15 @@ console.log(errs.length ? 'ERRORES:\n' + errs.join('\n') : '[1] OK — referenci
 
 /* ---------- 2. créditos ---------- */
 const porComp = {}; let tot = 0;
-for (const a of PLAN) { porComp[a.comp] = (porComp[a.comp] || 0) + a.cr; tot += a.cr; }
-console.log('\n[2] Créditos por componente');
+for (const a of PLAN) { porComp[a.comp] = (porComp[a.comp] || 0) + a.cr; if (!COMPONENTES[a.comp].noCuenta) tot += a.cr; }
+console.log('\n[2] Créditos por componente (los cupos genéricos usan un valor típico, así que FP/DP/LE pueden no cuadrar exactamente)');
 for (const k in COMPONENTES)
-  console.log(`   ${k.padEnd(3)} ${String(porComp[k] || 0).padStart(3)} vs declarado ${String(COMPONENTES[k].creditos).padStart(3)}  ${(porComp[k] || 0) === COMPONENTES[k].creditos ? 'OK' : 'MAL'}`);
-console.log(`   TOTAL ${tot} vs ${TOTAL_CREDITOS}  ${tot === TOTAL_CREDITOS ? 'OK' : 'MAL'}`);
+  console.log(`   ${k.padEnd(3)} ${String(porComp[k] || 0).padStart(3)} vs declarado ${String(COMPONENTES[k].creditos).padStart(3)}  ${(porComp[k] || 0) === COMPONENTES[k].creditos ? 'OK' : '≈'}`);
+console.log(`   TOTAL ${tot} vs ${TOTAL_CREDITOS} (sin nivelación)`);
+// Lo que sí debe cuadrar exactamente: fundamentación obligatoria y trabajo de grado (verificados con el SIA)
+if (porComp.FO !== COMPONENTES.FO.creditos) errs.push(`FO suma ${porComp.FO}, declarado ${COMPONENTES.FO.creditos}`);
+if (porComp.TG !== COMPONENTES.TG.creditos) errs.push(`TG suma ${porComp.TG}, declarado ${COMPONENTES.TG.creditos}`);
+if (Math.abs(tot - TOTAL_CREDITOS) > 6) errs.push(`el total del plan (${tot}) se aleja demasiado de ${TOTAL_CREDITOS}`);
 const porSem = {}; for (const a of PLAN) porSem[a.sem] = (porSem[a.sem] || 0) + a.cr;
 console.log('   por semestre:', JSON.stringify(porSem));
 
@@ -92,7 +99,7 @@ correr('Desde cero / carga alta', [], 24);
 const tres = PLAN.filter(a => a.sem <= 3).map(a => a.id);
 correr('Semestres I-III aprobados', tres, 18);
 // caso patológico: solo aprobó cosas sueltas
-correr('Solo Quimica Fundamental aprobada', ['2026364'], 16);
+correr('Solo Calculo diferencial aprobado', ['1000004'], 16);
 
 /* ---------- 5. edición de la malla ---------- */
 console.log('\n[5] Edición de la malla');
@@ -100,32 +107,34 @@ const ok = (c, m) => { console.log((c ? '   OK   ' : '   FALLA') + '  ' + m); if
 const sinMods = () => ({ editados: {}, nuevos: [], eliminados: [], orden: null });
 const conMods = m => { api.S.estado = {}; api.S.ranuras = {}; api.S.mods = Object.assign(sinMods(), m); api.construirPlan(); };
 
-conMods({ editados: { '2015570': { sem: 5 } } });
-ok(api.PLAN_POR_ID['2015570'].sem === 5, 'mover una asignatura a otro semestre');
-ok(api.PLAN_BASE.find(a => a.id === '2015570').sem === 7, 'la malla original queda intacta');
+const N = api.PLAN_BASE.length;
+conMods({ editados: { '2016696': { sem: 7 } } });
+ok(api.PLAN_POR_ID['2016696'].sem === 7, 'mover una asignatura a otro semestre (Algoritmos VI → VII)');
+ok(api.PLAN_BASE.find(a => a.id === '2016696').sem === 6, 'la malla original queda intacta');
 
-conMods({ editados: { '2015570': { cr: 5 } } });
-ok(api.metricas().comp.DO.plan === 59, 'editar créditos recalcula el componente (57 → 59)');
+conMods({ editados: { '2016696': { cr: 4 } } });
+ok(api.metricas().comp.FO.plan === COMPONENTES.FO.creditos + 1, 'editar créditos recalcula el componente (15 → 16)');
 
-conMods({ eliminados: ['1000034'] });
-ok(!api.PLAN_POR_ID['1000034'], 'la asignatura eliminada sale del plan');
-ok(!api.PLAN_POR_ID['1000036'].pre.includes('1000034'), 'se limpian las referencias colgantes');
-ok(api.PLAN.length === 52, `quedan 52 asignaturas (hay ${api.PLAN.length})`);
+conMods({ eliminados: ['1000045'] });
+ok(!api.PLAN_POR_ID['1000045'], 'la asignatura eliminada sale del plan');
+ok(!api.PLAN_POR_ID['1000046'].pre.includes('1000045'), 'se limpian las referencias colgantes (Inglés III ya no exige Inglés II)');
+ok(api.PLAN.length === N - 1, `quedan ${N - 1} asignaturas (hay ${api.PLAN.length})`);
 
-conMods({ nuevos: [{ id: 'X1', cod: '9999', nombre: 'Seminario', cr: 2, sem: 6, comp: 'LE', area: null, pre: ['2026364'], co: [] }] });
-ok(api.PLAN.length === 54 && api.PLAN_POR_ID['X1'].sem === 6, 'la asignatura nueva entra en el plan');
+conMods({ nuevos: [{ id: 'X1', cod: '9999', nombre: 'Seminario', cr: 2, sem: 6, comp: 'LE', area: null, pre: ['1000004'], co: [] }] });
+ok(api.PLAN.length === N + 1 && api.PLAN_POR_ID['X1'].sem === 6, 'la asignatura nueva entra en el plan');
 
-conMods({ editados: { '2026364': { pre: ['1000036'] } } });
-ok(api.cicloDetectado() === true, 'detecta un ciclo de prerrequisitos');
-conMods({});
+conMods({ editados: { '1000044': { pre: ['1000047'] } } });
+ok(api.cicloDetectado() === true, 'detecta un ciclo de prerrequisitos (Inglés I ← Inglés IV)');
+conMods({ editados: { '2016703': { co: ['2025975'] }, '2025975': { co: ['2016703'] } } });
 ok(api.cicloDetectado() === false, 'los correquisitos mutuos NO cuentan como ciclo');
+conMods({});
 
 conMods({ orden: api.PLAN.map(a => a.id).reverse() });
-ok(api.PLAN[0].id === '2015281', 'el orden explícito (arrastrar) se respeta');
+ok(api.PLAN[0].id === 'ELE_10_3', 'el orden explícito (arrastrar) se respeta');
 
 // el planificador debe seguir produciendo planes válidos sobre una malla editada
 conMods({
-  editados: { '2015570': { sem: 5 }, '2029268': { cr: 3 } },
+  editados: { '2016696': { sem: 7 }, '2015174': { cr: 3 } },
   nuevos: [{ id: 'X2', cod: null, nombre: 'Electiva extra', cr: 3, sem: 9, comp: 'LE', area: null, pre: [], co: [] }],
 });
 correr('Plan sobre una malla editada', [], 18);

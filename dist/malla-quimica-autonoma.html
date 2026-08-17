@@ -6,7 +6,7 @@
 <title>Malla Curricular · Pregrado en Química · UNAL Bogotá</title>
 
 <style>
-/* ===== css/estilos.css ===== */
+/* ===== ../css/estilos.css ===== */
 /* ==========================================================================
    Malla Curricular Química UNAL — estilos
    ========================================================================== */
@@ -591,11 +591,12 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
 </style>
 
 <header class="top">
-  <div class="logo">⚗</div>
+  <div class="logo" data-texto="logo">🎓</div>
   <div>
-    <h1>Malla Curricular · Pregrado en Química</h1>
-    <p class="sub">Universidad Nacional de Colombia · Sede Bogotá · 158 créditos</p>
+    <h1 data-texto="titulo">Malla curricular</h1>
+    <p class="sub" data-texto="subtitulo">Universidad Nacional de Colombia · Sede Bogotá</p>
   </div>
+  <a class="btn-tema" href="../" style="text-decoration:none" title="Elegir otra carrera">☰ Carreras</a>
   <div class="crece"></div>
   <button class="btn-tema" id="btnTema">◐ Auto</button>
 </header>
@@ -618,6 +619,7 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
     <div class="toolbar">
       <input type="search" id="busca" placeholder="Buscar asignatura o código…">
       <label><input type="checkbox" id="chkDisp"> Solo lo que puedo inscribir</label>
+      <button class="btn" id="btnNivelacion" title="Marca las asignaturas de nivelación (inglés, matemáticas básicas…) como exentas u homologadas" hidden>Nivelación: exento</button>
       <button class="btn" id="btnEdicion">✎ Editar malla</button>
       <button class="btn" id="btnLimpiarResalte" hidden>Quitar resalte</button>
     </div>
@@ -679,7 +681,7 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
     </div>
     <div class="aviso">
       El plan respeta prerrequisitos y correquisitos y agrupa los pares que deben inscribirse juntos
-      (p. ej. Electroquímica Analítica + su laboratorio). El modo <b>ruta crítica</b> prioriza las
+      (p. ej. <span data-texto="ejemploPar">una teórica y su laboratorio</span>). El modo <b>ruta crítica</b> prioriza las
       asignaturas de las que más cosas dependen, para no quedar frenado más adelante.
     </div>
     <div id="planCont"></div>
@@ -688,24 +690,15 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
   <!-- ============================= CATÁLOGO ============================ -->
   <section class="vista" id="vCatalogo" hidden>
     <div class="toolbar">
-      <input type="search" id="buscaCat" placeholder="Buscar por tema: catálisis, nanotubos, enzimas…">
+      <input type="search" id="buscaCat" placeholder="Buscar por tema…" data-texto-placeholder="buscaCatalogo">
       <label>Grupo
         <select id="selGrupo">
           <option value="">Todos</option>
-          <option value="fundamentacion">Optativas de fundamentación</option>
-          <option value="quimica_fisica">Química física</option>
-          <option value="estructura_interacciones">Estructura e interacciones</option>
-          <option value="quimica_organica">Química orgánica</option>
-          <option value="bioquimica">Bioquímica</option>
-          <option value="quimica_aplicada">Química aplicada</option>
+          <!-- el resto se genera desde GRUPOS_CATALOGO (js/datos.js) -->
         </select></label>
     </div>
-    <p style="font-size:13px;color:var(--texto-2);margin:-6px 0 14px">
-      Las 67 optativas de la malla de apoyo, con sus <b>créditos reales</b>, la descripción y el
-      contenido oficial del SIA, y el profesor mejor calificado de cada una. La búsqueda entra
-      también en las descripciones, así que puedes buscar por tema.
-      Para asignar una optativa a un cupo, ábrelo desde la pestaña <b>Malla</b>.
-      Las marcadas con ⚠ tienen el código mal impreso en el PDF.
+    <p style="font-size:13px;color:var(--texto-2);margin:-6px 0 14px" data-texto-html="catalogo">
+      Las optativas del plan, con sus créditos reales y su descripción. Para asignar una a un cupo, ábrelo desde la pestaña <b>Malla</b>.
     </p>
     <div id="catCont"></div>
   </section>
@@ -723,11 +716,8 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
       <label><input type="checkbox" id="chkEleVig" checked> Solo vigentes</label>
       <label><input type="checkbox" id="chkEleDesc"> Solo con descripción</label>
     </div>
-    <div class="aviso">
-      <b>Electivas ≠ optativas.</b> Estas son las de <b>libre elección</b>: los 32 créditos que
-      puedes llenar con casi cualquier asignatura de la Universidad. Las <b>optativas</b> son otra
-      cosa — van a los 3 créditos de fundamentación optativa y a los 18 de disciplinar optativa, y
-      están en la pestaña anterior.
+    <div class="aviso" data-texto-html="electivas">
+      <b>Electivas ≠ optativas.</b> Estas son las de <b>libre elección</b>, que puedes llenar con casi cualquier asignatura de la Universidad. Las <b>optativas</b> están en la pestaña anterior.
     </div>
     <p style="font-size:13px;color:var(--texto-2);margin:-6px 0 14px" id="ayudaEle"></p>
     <div id="eleCont"></div>
@@ -754,12 +744,7 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
     <div class="panel" style="margin-bottom:16px">
       <h3>Fuentes</h3>
       <p style="font-size:13.5px;color:var(--texto-2);margin:0">
-        <b>Malla Curricular Pregrado Química.pdf</b> — documento oficial de la Facultad de Ciencias
-        (semestres, créditos, prerrequisitos y correquisitos).<br>
-        <b>Malla completa.pdf</b> — «Tu malla curricular de confianza», Grupos de Estudio Autónomo
-        (grafo de dependencias, códigos faltantes y catálogo completo de optativas).<br>
-        <b>losestudiantes.com</b> — tercera fuente, usada para verificar los códigos y para
-        enlazar cada asignatura con sus profesores y reseñas.<br>
+        <span data-texto-html="fuentes"></span>
         <b>Catálogo de asignaturas del SIA</b> — oferta del semestre: grupos, profesores, horarios,
         salones y cupos (pestaña <i>Horario</i> y ficha de cada asignatura). Es el acceso público,
         sin sesión; se actualiza con <code>node herramientas/catalogo-sia.js sincronizar</code>.
@@ -782,8 +767,7 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
       </p>
     </div>
     <div class="aviso">
-      Los dos documentos no coinciden en algunos códigos. Abajo está cada diferencia y qué dato usa
-      esta app. <b>Confirma siempre en el SIA antes de inscribir.</b>
+      <span data-texto-html="notas">Abajo está lo que se sabe de cada fuente y qué dato usa esta app.</span> <b>Confirma siempre en el SIA antes de inscribir.</b>
     </div>
     <div id="notasCont"></div>
   </section>
@@ -793,7 +777,36 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
 <dialog class="detalle" id="detalle"></dialog>
 
 <script>
-/* ===== js/losestudiantes.js ===== */
+/* ===== ../carreras/quimica/carrera.js ===== */
+/* ============================================================================
+   carrera.js — Química (plan 2519), UNAL Sede Bogotá.
+   Lo leen la app (título, textos, clave de guardado) y las herramientas de
+   línea de comandos (qué plan consultar en el SIA). Todo lo demás es genérico.
+   ========================================================================== */
+const CARRERA = {
+  nombre: 'Química',
+  titulo: 'Malla Curricular · Pregrado en Química',
+  subtitulo: 'Universidad Nacional de Colombia · Sede Bogotá · 158 créditos',
+  logo: '⚗',
+  slug: 'quimica',
+  plan: '2519',
+  sede: /1101 SEDE BOGOT/,
+  facultad: /2050 FACULTAD DE CIENCIAS$/,
+  claveLS: 'mallaQuimicaUNAL.v1',
+  archivoAvance: 'avance-malla-quimica.json',
+  agente: 'malla-unal/1.0',
+  textos: {
+    buscaCatalogo: 'Buscar por tema: catálisis, nanotubos, enzimas…',
+    catalogo: 'Las 67 optativas de la malla de apoyo, con sus <b>créditos reales</b>, la descripción y el contenido oficial del SIA, y el profesor mejor calificado de cada una. La búsqueda entra también en las descripciones, así que puedes buscar por tema. Para asignar una optativa a un cupo, ábrelo desde la pestaña <b>Malla</b>. Las marcadas con ⚠ tienen el código mal impreso en el PDF.',
+    electivas: '<b>Electivas ≠ optativas.</b> Estas son las de <b>libre elección</b>: los 32 créditos que puedes llenar con casi cualquier asignatura de la Universidad. Las <b>optativas</b> son otra cosa — van a los 3 créditos de fundamentación optativa y a los 18 de disciplinar optativa, y están en la pestaña anterior.',
+    ejemploPar: 'Electroquímica Analítica + su laboratorio',
+    fuentes: '<b>Malla Curricular Pregrado Química.pdf</b> — documento oficial de la Facultad de Ciencias (semestres, créditos, prerrequisitos y correquisitos).<br><b>Malla completa.pdf</b> — «Tu malla curricular de confianza», Grupos de Estudio Autónomo (grafo de dependencias, códigos faltantes y catálogo completo de optativas).<br><b>losestudiantes.com</b> — tercera fuente, usada para verificar los códigos y para enlazar cada asignatura con sus profesores y reseñas.<br>',
+    notas: 'Los dos documentos no coinciden en algunos códigos. Abajo está cada diferencia y qué dato usa esta app.',
+  },
+};
+
+
+/* ===== ../carreras/quimica/losestudiantes.js ===== */
 /* ============================================================================
    losestudiantes.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
    Fuente: losestudiantes.com
@@ -7798,7 +7811,7 @@ const LOSESTUDIANTES = {
 };
 
 
-/* ===== js/sia.js ===== */
+/* ===== ../carreras/quimica/sia.js ===== */
 /* ============================================================================
    sia.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
    Fuente: catálogo público "Contenido de asignaturas" del SIA Bogotá
@@ -9046,7 +9059,7 @@ const SIA = {
 };
 
 
-/* ===== js/electivas.js ===== */
+/* ===== ../carreras/quimica/electivas.js ===== */
 /* ============================================================================
    electivas.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
    Electivas de LIBRE ELECCIÓN (los 32 créditos), no optativas.
@@ -12476,7 +12489,7 @@ const ELECTIVAS = [
 ];
 
 
-/* ===== js/oferta.js ===== */
+/* ===== ../carreras/quimica/oferta.js ===== */
 /* ============================================================================
    oferta.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
    Oferta del semestre: grupos, profesores, horarios, salones y cupos.
@@ -45964,7 +45977,7 @@ const OFERTA = {
 };
 
 
-/* ===== js/datos.js ===== */
+/* ===== ../carreras/quimica/datos.js ===== */
 /* ============================================================================
    datos.js — Malla curricular Pregrado en Química, UNAL Sede Bogotá
    Fuentes:
@@ -46241,13 +46254,15 @@ const INCONSISTENCIAS = [
    PLAN_BASE más las modificaciones que guarde la persona usuaria. */
 
 
-/* ===== js/app.js ===== */
+/* ===== ../js/app.js ===== */
 /* ==========================================================================
    app.js — motor de prerrequisitos, planificador y UI
    ========================================================================== */
 'use strict';
 
-const CLAVE_LS = 'mallaQuimicaUNAL.v1';
+const CARRERA_APP = typeof CARRERA === 'object' ? CARRERA : {};
+const CLAVE_LS = CARRERA_APP.claveLS || 'mallaQuimicaUNAL.v1';
+const NOMBRE_CARRERA = CARRERA_APP.nombre || 'Química';
 const ROMANOS = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
 /* ------------------------------------------------------------------ estado */
@@ -46299,8 +46314,20 @@ function construirPlan() {
       c.pre = (c.pre || []).filter(p => !fuera.has(p));
       c.co = (c.co || []).filter(p => !fuera.has(p));
       c.preSug = (c.preSug || []).filter(p => !fuera.has(p));
+      /* Si es un cupo con una optativa asignada y el catálogo conoce los
+         requisitos de esa optativa, el cupo los hereda. */
+      const asig = c.ranura && S.ranuras[c.id];
+      const opt = asig && asig.cod && CATALOGO.find(o => o.cod === asig.cod && (o.pre || o.preEsp || o.preFund));
+      if (opt) {
+        c.pre = [...new Set([...c.pre, ...(opt.pre || []).filter(p => !fuera.has(p))])];
+        if (opt.preEsp) c.preEsp = opt.preEsp;
+        if (opt.preFund) c.preFund = true;
+      }
       return c;
     });
+  // Prerrequisitos heredados que apunten a asignaturas fuera del plan se descartan.
+  const enPlan = new Set(arr.map(a => a.id));
+  for (const c of arr) c.pre = c.pre.filter(p => enPlan.has(p));
 
   // Orden explícito (arrastrar y soltar); las nuevas van al final de su semestre.
   if (m.orden && m.orden.length) {
@@ -46341,9 +46368,11 @@ function setAprobadas() {
  * Solo Trabajo de Grado lo tiene de forma evaluable.
  */
 function cumplePreEspecial(a, hechas) {
-  if (a.id !== '2015281') return true;
+  // Trabajo de grado, y cualquier asignatura marcada con preFund, exigen toda la
+  // fundamentación (y la disciplinar obligatoria, si la carrera la tiene).
+  if (a.comp !== 'TG' && !a.preFund) return true;
   return PLAN.every(x =>
-    x.id === '2015281' ||
+    x.comp === 'TG' || x.id === a.id ||
     !['FO', 'FP', 'DO'].includes(x.comp) ||
     hechas.has(x.id));
 }
@@ -46513,11 +46542,13 @@ function metricas() {
   for (const k of Object.keys(COMPONENTES)) r.comp[k] = { hecho: 0, cursando: 0, meta: COMPONENTES[k].creditos, plan: 0 };
   for (const a of PLAN) {
     const c = creditos(a), e = est(a.id);
+    // Los componentes con noCuenta (nivelación) no suman al total del plan.
+    const cuenta = !(COMPONENTES[a.comp] && COMPONENTES[a.comp].noCuenta);
     r.comp[a.comp].plan += c;
-    if (e === 'aprobada' || e === 'homologada') { r.comp[a.comp].hecho += c; r.total.hecho += c; }
-    else if (e === 'cursando') { r.comp[a.comp].cursando += c; r.total.cursando += c; }
+    if (e === 'aprobada' || e === 'homologada') { r.comp[a.comp].hecho += c; if (cuenta) r.total.hecho += c; }
+    else if (e === 'cursando') { r.comp[a.comp].cursando += c; if (cuenta) r.total.cursando += c; }
   }
-  r.total.plan = PLAN.reduce((s, a) => s + creditos(a), 0);
+  r.total.plan = PLAN.filter(a => !(COMPONENTES[a.comp] && COMPONENTES[a.comp].noCuenta)).reduce((s, a) => s + creditos(a), 0);
   return r;
 }
 
@@ -46878,7 +46909,14 @@ function abrirDetalle(id) {
       opciones = `<div class="campo"><label>Asignar optativa del catálogo</label>
         <select id="selRanura">
           <option value="">— sin asignar —</option>
-          ${items.map(c => `<option value="${esc(c.cod)}|${esc(c.nombre)}" ${asig.cod === c.cod && asig.nombre === c.nombre ? 'selected' : ''}>${esc(c.nombre)} (${esc(c.cod)})${c.codErrado ? ' ⚠' : ''}</option>`).join('')}
+          ${(() => {
+            const op = c => `<option value="${esc(c.cod)}|${esc(c.nombre)}" ${asig.cod === c.cod && asig.nombre === c.nombre ? 'selected' : ''}>${esc(c.nombre)} (${esc(c.cod)})${c.codErrado ? ' ⚠' : ''}</option>`;
+            // Si el cupo admite varios grupos del catálogo, se agrupan para no perderse en la lista.
+            const gruposPresentes = grupos.filter(g => items.some(c => c.grupo === g));
+            return gruposPresentes.length > 1
+              ? gruposPresentes.map(g => `<optgroup label="${esc(GRUPOS_CATALOGO[g] || g)}">${items.filter(c => c.grupo === g).map(op).join('')}</optgroup>`).join('')
+              : items.map(op).join('');
+          })()}
         </select>
         ${elegida && elegida.codErrado ? `<div class="nota-box" style="margin-top:8px"><b>⚠ El código de esta optativa está mal en el PDF</b>
           ${esc(elegida.nota || `El código ${elegida.cod} pertenece a otra asignatura.`)}</div>` : ''}
@@ -47392,17 +47430,17 @@ function pintarElectivas() {
 
   const nVig = LISTA_ELECTIVAS.filter(e => e.vigente !== false).length;
   const nCad = LISTA_ELECTIVAS.length - nVig;
-  $('#ayudaEle').innerHTML = `${LISTA_ELECTIVAS.length} electivas del Departamento de Electivas,
-    contrastadas una a una con el SIA${nCad ? `: <b>${nVig} vigentes</b> y ${nCad} caducada(s)` : ''}.
+  const fuenteEle = typeof ELECTIVAS_FUENTE === 'string' ? ELECTIVAS_FUENTE : 'electivas del Departamento de Electivas, contrastadas una a una con el SIA';
+  $('#ayudaEle').innerHTML = `${LISTA_ELECTIVAS.length} ${fuenteEle}${nCad ? `: <b>${nVig} vigentes</b> y ${nCad} caducada(s)` : ''}.
     Mostrando <b>${items.length}</b>. Tienes <b>${libres.length} de ${cupos.length}</b> cupos de
     electiva sin asignar (${cupos.reduce((s, a) => s + creditos(a), 0)} créditos en total).
-    ★ = el SIA la asocia al plan de Química.`;
+    ★ = el SIA la asocia al plan de ${esc(NOMBRE_CARRERA)}.`;
 
   $('#eleCont').innerHTML = items.length ? `<div class="cat-grid">${items.map(e => {
     const slot = usadas.get(e.cod);
     return `<div class="cat-item ${slot ? 'usada' : ''}">
       <div class="cat-nom">${esc(e.nombre)}
-        ${e.enPlanQuimica ? '<span class="bien" title="El SIA la asocia al plan de Química">★</span>' : ''}
+        ${e.enPlan || e.enPlanQuimica ? `<span class="bien" title="El SIA la asocia al plan de ${esc(NOMBRE_CARRERA)}">★</span>` : ''}
         ${e.vigente === false ? '<span class="warn" title="El SIA la marca como no vigente">✗</span>' : ''}</div>
       <div class="c">${esc(e.cod)}${e.creditos != null ? ` · <b>${e.creditos} créditos</b>` : ''}${e.horas != null ? ` · ${e.horas} h` : ''}${e.validable ? ' · validable' : ''}</div>
       ${e.unidad ? `<div class="c">${esc(e.unidad)}</div>` : ''}
@@ -47890,6 +47928,7 @@ function irA(id) {
 }
 
 function refrescar() {
+  construirPlan();   // los cupos heredan requisitos de la optativa asignada
   pintarMalla();
   pintarResumen();
   if (!$('#vPlan').hidden) pintarPlan();
@@ -47897,7 +47936,7 @@ function refrescar() {
   if (!$('#vElectivas').hidden) pintarElectivas();
   if (!$('#vHorario').hidden) pintarHorario();
   const m = metricas();
-  $('#progGlobal').style.width = (m.total.hecho / m.total.meta * 100) + '%';
+  $('#progGlobal').style.width = Math.min(100, m.total.hecho / m.total.meta * 100) + '%';
 
   const n = Object.keys(S.mods.editados).length + S.mods.nuevos.length + S.mods.eliminados.length;
   $('#contadorMods').textContent = n ? ` ${n} asignatura(s) con cambios.` : '';
@@ -47907,7 +47946,24 @@ function refrescar() {
 /* -------------------------------------------------------------------- init */
 function init() {
   construirPlan();
+  // Textos de la carrera (título, subtítulo, fuentes…) desde carreras/<slug>/carrera.js.
+  const T = Object.assign({}, CARRERA_APP.textos || {});
+  ['titulo', 'subtitulo', 'logo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
+  $$('[data-texto]').forEach(el => { const v = T[el.dataset.texto]; if (v != null) el.textContent = v; });
+  $$('[data-texto-html]').forEach(el => { const v = T[el.dataset.textoHtml]; if (v != null) el.innerHTML = v; });
+  $$('[data-texto-placeholder]').forEach(el => { const v = T[el.dataset.textoPlaceholder]; if (v != null) el.placeholder = v; });
+  if (CARRERA_APP.titulo) document.title = CARRERA_APP.titulo + ' · UNAL Bogotá';
+  // El atajo de nivelación solo tiene sentido si la carrera tiene componentes que no cuentan.
+  const bNiv0 = $('#btnNivelacion');
+  if (bNiv0) bNiv0.hidden = !Object.values(COMPONENTES).some(c => c.noCuenta);
   pintarNotas();
+  // Grupos del catálogo de optativas: vienen de datos.js, no del HTML.
+  const selG = $('#selGrupo');
+  if (selG && selG.options.length <= 1) {
+    for (const [gid, gnom] of Object.entries(GRUPOS_CATALOGO)) {
+      const o = document.createElement('option'); o.value = gid; o.textContent = gnom; selG.appendChild(o);
+    }
+  }
   $('#numMax').value = S.config.maxCr;
 
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => irA(b.dataset.vista)));
@@ -48075,6 +48131,15 @@ function init() {
   $('#buscaHor').addEventListener('input', sugerirHorario);
   $('#buscaHor').addEventListener('focus', sugerirHorario);
   $('#btnLimpiarResalte').addEventListener('click', () => { resaltado = null; refrescar(); });
+  // Nivelación (inglés, matemáticas básicas, lecto-escritura): no todo el mundo la cursa.
+  const bNiv = $('#btnNivelacion');
+  if (bNiv) bNiv.addEventListener('click', () => {
+    const niv = PLAN.filter(a => COMPONENTES[a.comp] && COMPONENTES[a.comp].noCuenta);
+    const todasExentas = niv.every(a => est(a.id) === 'homologada');
+    niv.forEach(a => { if (todasExentas) delete S.estado[a.id]; else S.estado[a.id] = 'homologada'; });
+    guardar(); refrescar();
+    avisar(todasExentas ? 'Nivelación devuelta a pendiente.' : `${niv.length} asignaturas de nivelación marcadas como exentas.`);
+  });
   $('#selModo').addEventListener('change', pintarPlan);
   $('#numMax').addEventListener('change', pintarPlan);
   $('#chkNivel').addEventListener('change', pintarPlan);
@@ -48099,7 +48164,7 @@ function init() {
     const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'avance-malla-quimica.json';
+    a.download = CARRERA_APP.archivoAvance || 'avance-malla-quimica.json';
     a.click(); URL.revokeObjectURL(a.href);
   });
   $('#fileImportar').addEventListener('change', e => {

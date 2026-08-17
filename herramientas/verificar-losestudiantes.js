@@ -8,7 +8,7 @@
      2. Validar los códigos contra una tercera fuente, independiente de los dos
         PDF (que se contradicen en varios).
 
-   Genera js/losestudiantes.js, que la app carga como un <script> normal para
+   Genera carreras/<slug>/losestudiantes.js, que la app carga como un <script> normal para
    que funcione también abriendo index.html con file://.
 
    Uso:  node herramientas/verificar-losestudiantes.js
@@ -23,6 +23,10 @@ const path = require('path');
 const vm = require('vm');
 
 const RAIZ = path.resolve(__dirname, '..');
+/* Todo lo de la carrera vive en carreras/<slug>/ (--carrera=<slug>). */
+const { resolverCarrera, argvSinCarrera } = require('./_carrera');
+const { slug: SLUG_CARRERA, dir: DIR_CARRERA, carrera: CARRERA_ACTUAL } = resolverCarrera();
+process.argv = argvSinCarrera();
 const BASE = 'https://losestudiantes.com/universidad-nacional/courses/';
 const PAUSA_MS = 400;
 const REINTENTOS = 2;
@@ -35,7 +39,7 @@ const dormir = ms => new Promise(r => setTimeout(r, ms));
 /** Carga PLAN_BASE y CATALOGO desde js/datos.js sin necesitar un navegador. */
 function cargarDatos() {
   const ctx = vm.createContext({});
-  const src = fs.readFileSync(path.join(RAIZ, 'js/datos.js'), 'utf8')
+  const src = fs.readFileSync(path.join(DIR_CARRERA, 'datos.js'), 'utf8')
     + '\n;({ PLAN_BASE, CATALOGO });';
   return vm.runInContext(src, ctx);
 }
@@ -47,7 +51,7 @@ const aSlug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 async function consultar(cod) {
   for (let i = 0; i <= REINTENTOS; i++) {
     try {
-      const r = await fetch(BASE + cod, { headers: { 'user-agent': 'malla-curricular-quimica/1.0' } });
+      const r = await fetch(BASE + cod, { headers: { 'user-agent': 'malla-curricular-unal/1.0' } });
       if (r.status === 429 || r.status >= 500) { await dormir(2000 * (i + 1)); continue; }
       const html = await r.text();
       const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
@@ -129,7 +133,7 @@ const LE_VERIFICADO = '${fecha}';
 /* código SIA -> { nombre tal como aparece allí, url de la materia } */
 const LOSESTUDIANTES = ${JSON.stringify(salida, null, 2)};
 `;
-  fs.writeFileSync(path.join(RAIZ, 'js/losestudiantes.js'), js);
+  fs.writeFileSync(path.join(DIR_CARRERA, 'losestudiantes.js'), js);
 
   console.log(`\n──────────────────────────────────────────────`);
   console.log(`Encontrados : ${Object.keys(salida).length}`);
@@ -143,5 +147,5 @@ const LOSESTUDIANTES = ${JSON.stringify(salida, null, 2)};
     console.log(`\nSin registro en losestudiantes.com:`);
     for (const a of ausentes) console.log(`  ${a.cod}  ${a.nombre}`);
   }
-  console.log(`\nEscrito js/losestudiantes.js`);
+  console.log(`\nEscrito carreras/${SLUG_CARRERA}/losestudiantes.js`);
 })();

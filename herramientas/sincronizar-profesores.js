@@ -1,7 +1,7 @@
 /* ============================================================================
    sincronizar-profesores.js
    ----------------------------------------------------------------------------
-   Añade a js/losestudiantes.js la lista de profesores que dicta cada materia,
+   Añade a carreras/<slug>/losestudiantes.js la lista de profesores que dicta cada materia,
    tal como aparece en el panel lateral de losestudiantes.com.
 
    Por qué hace falta un navegador: esa lista NO viene en el HTML que sirve el
@@ -22,7 +22,11 @@ const path = require('path');
 const vm = require('vm');
 
 const RAIZ = path.resolve(__dirname, '..');
-const ARCHIVO = path.join(RAIZ, 'js/losestudiantes.js');
+/* Todo lo de la carrera vive en carreras/<slug>/ (--carrera=<slug>). */
+const { resolverCarrera, argvSinCarrera } = require('./_carrera');
+const { slug: SLUG_CARRERA, dir: DIR_CARRERA, carrera: CARRERA_ACTUAL } = resolverCarrera();
+process.argv = argvSinCarrera();
+const ARCHIVO = path.join(DIR_CARRERA, 'losestudiantes.js');
 const PAUSA_MS = 900;
 const ESPERA_RENDER_MS = 2200;
 
@@ -33,7 +37,7 @@ const dormir = ms => new Promise(r => setTimeout(r, ms));
 
 function cargarIndice() {
   if (!fs.existsSync(ARCHIVO)) {
-    console.error('Falta js/losestudiantes.js.\nEjecuta antes: node herramientas/verificar-losestudiantes.js');
+    console.error('Falta carreras/' + SLUG_CARRERA + '/losestudiantes.js.\nEjecuta antes: node herramientas/verificar-losestudiantes.js');
     process.exit(1);
   }
   const ctx = vm.createContext({});
@@ -70,7 +74,7 @@ function leerProfesores() {
  */
 async function detalleProfesor(slug) {
   const r = await fetch('https://losestudiantes.com/universidad-nacional/professors/' + encodeURIComponent(slug),
-    { headers: { 'user-agent': 'malla-curricular-quimica/1.0' } });
+    { headers: { 'user-agent': 'malla-curricular-unal/1.0' } });
   if (!r.ok) return null;
   const html = await r.text();
   const m = html.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s);
@@ -217,5 +221,5 @@ const LOSESTUDIANTES = ${JSON.stringify(LOSESTUDIANTES, null, 2)};
   console.log(`Materias sin profesores: ${sinProfes}`);
   console.log(`Errores                : ${fallos}`);
   console.log(`Profesores registrados : ${total}`);
-  console.log(`\nEscrito js/losestudiantes.js`);
+  console.log(`\nEscrito carreras/${SLUG_CARRERA}/losestudiantes.js`);
 })();

@@ -8,7 +8,7 @@
      node herramientas/sia.js ver <código>       ficha completa de una asignatura
      node herramientas/sia.js enriquecer         cruza la malla y el catálogo de
                                                  optativas con el SIA y escribe
-                                                 js/sia.js
+                                                 carreras/<slug>/sia.js
 
    Lo que NO puede hacer, y conviene tener claro:
      · No sabe qué se ofrece este semestre, ni horarios, ni cupos. Eso está en
@@ -22,6 +22,10 @@ const path = require('path');
 const vm = require('vm');
 
 const RAIZ = path.resolve(__dirname, '..');
+/* Todo lo de la carrera vive en carreras/<slug>/ (--carrera=<slug>). */
+const { resolverCarrera, argvSinCarrera } = require('./_carrera');
+const { slug: SLUG_CARRERA, dir: DIR_CARRERA, carrera: CARRERA_ACTUAL } = resolverCarrera();
+process.argv = argvSinCarrera();
 const BASE = 'https://siabog.unal.edu.co/academia/apoyo-administrativo/ConsultaContenidos.do';
 const PAUSA_MS = 500;
 
@@ -31,7 +35,7 @@ const dormir = ms => new Promise(r => setTimeout(r, ms));
 async function pedir(params) {
   const url = BASE + '?' + new URLSearchParams(
     Object.assign({ action: '', idAsignatura: '', idSession_hd: '', txtIdAsignatura: '', txtNombreAsignatura: '' }, params));
-  const r = await fetch(url, { headers: { 'user-agent': 'malla-curricular-quimica/1.0' } });
+  const r = await fetch(url, { headers: { 'user-agent': 'malla-curricular-unal/1.0' } });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return new TextDecoder('iso-8859-1').decode(await r.arrayBuffer());
 }
@@ -133,7 +137,7 @@ async function ver(cod) {
 function cargarDatos() {
   const ctx = vm.createContext({});
   return vm.runInContext(
-    fs.readFileSync(path.join(RAIZ, 'js/datos.js'), 'utf8') + '\n;({ PLAN_BASE, CATALOGO });', ctx);
+    fs.readFileSync(path.join(DIR_CARRERA, 'datos.js'), 'utf8') + '\n;({ PLAN_BASE, CATALOGO });', ctx);
 }
 
 const normalizar = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -198,7 +202,7 @@ async function enriquecer() {
   }
 
   const fecha = new Date().toISOString().slice(0, 10);
-  fs.writeFileSync(path.join(RAIZ, 'js/sia.js'), `/* ============================================================================
+  fs.writeFileSync(path.join(DIR_CARRERA, 'sia.js'), `/* ============================================================================
    sia.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
    Fuente: catálogo público "Contenido de asignaturas" del SIA Bogotá
    Consultado el ${fecha}. Regenerar con: node herramientas/sia.js enriquecer
@@ -227,7 +231,7 @@ const SIA = ${JSON.stringify(salida, null, 2)};
     console.log(`\nNo aparecen en el catálogo:`);
     for (const n of sinEncontrar) console.log(`  ${n.cod}  ${n.nombre}`);
   }
-  console.log(`\nEscrito js/sia.js`);
+  console.log(`\nEscrito carreras/${SLUG_CARRERA}/sia.js`);
 }
 
 /* ------------------------------------------------------------------ arranque */

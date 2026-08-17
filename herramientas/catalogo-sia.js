@@ -22,13 +22,15 @@
      · La sesión caduca a los 5 min sin actividad: si falla, se reinicia.
 
    Uso:
-     node herramientas/catalogo-sia.js plan                lista el plan de Química (todas
+     node herramientas/catalogo-sia.js plan                lista el plan de la carrera (todas
                                                            las tipologías menos libre elección)
      node herramientas/catalogo-sia.js ver <código>        grupos y horarios de una asignatura
      node herramientas/catalogo-sia.js libre [plan]        libre elección: del componente 2CLE
                                                            de la sede o del plan indicado (p.ej. 2516)
-     node herramientas/catalogo-sia.js sincronizar         descarga todo y escribe js/oferta.js
-     node herramientas/catalogo-sia.js sincronizar --sin-libre    solo el plan de Química
+     node herramientas/catalogo-sia.js sincronizar         descarga todo y escribe carreras/<slug>/oferta.js
+     node herramientas/catalogo-sia.js sincronizar --sin-libre    solo el plan de la carrera
+     node herramientas/catalogo-sia.js electivas             carreras/<slug>/electivas.js a partir de la libre elección de carreras/<slug>/oferta.js
+     node herramientas/catalogo-sia.js fichas                carreras/<slug>/sia.js (fichas de datos.js) a partir de carreras/<slug>/oferta.js
 
    Lo que sigue sin poder hacer: saber qué llevas aprobado (eso lo marcas en la
    app) ni inscribir nada.
@@ -39,7 +41,14 @@ const fs = require('fs');
 const path = require('path');
 
 const RAIZ = path.resolve(__dirname, '..');
-const ARCHIVO = path.join(RAIZ, 'js/oferta.js');
+/* Todo lo de la carrera vive en carreras/<slug>/ (--carrera=<slug>). */
+const { resolverCarrera, argvSinCarrera } = require('./_carrera');
+const { slug: SLUG_CARRERA, dir: DIR_CARRERA, carrera: CARRERA_ACTUAL } = resolverCarrera();
+process.argv = argvSinCarrera();
+const ARCHIVO = path.join(DIR_CARRERA, 'oferta.js');
+
+/* La carrera (plan del SIA, sede, facultad) viene de carreras/<slug>/carrera.js. */
+const CARRERA = CARRERA_ACTUAL;
 
 const BASE = 'https://sia.unal.edu.co';
 const RUTA = '/Catalogo/facespublico/public/servicioPublico.jsf';
@@ -47,27 +56,27 @@ const INICIO = BASE + RUTA + '?taskflowId=task-flow-AC_CatalogoAsignaturas';
 /* Ojo: con un User-Agent de navegador real, ADF responde una página «loopback»
    (redirección por JavaScript con _afrLoop) en vez del formulario. Con un agente
    sencillo entrega el formulario directamente. */
-const NAVEGADOR = 'malla-curricular-quimica/1.0 (herramientas/catalogo-sia.js)';
+const NAVEGADOR = CARRERA.agente + ' (herramientas/catalogo-sia.js)';
 const PAUSA_MS = 300;
 
-/* Valores del formulario para el pregrado de Química, sede Bogotá. Son índices
-   de las listas desplegables, no códigos, así que se comprueban contra el
-   texto de la opción antes de usarlos (ver `elegir`). */
+/* Valores del formulario para el pregrado, según js/carrera.js. Los valores
+   de las listas son índices, no códigos, así que se buscan por el texto de la
+   opción antes de usarlos (ver `elegirPor`). */
 const SEL = {
   nivel: { id: 'soc1', texto: /^Pregrado$/ },
-  sede: { id: 'soc9', texto: /1101 SEDE BOGOT/ },
-  facultad: { id: 'soc2', texto: /2050 FACULTAD DE CIENCIAS$/ },
-  plan: { id: 'soc3', texto: /2519 QU/ },
+  sede: { id: 'soc9', texto: CARRERA.sede },
+  facultad: { id: 'soc2', texto: CARRERA.facultad },
+  plan: { id: 'soc3', texto: new RegExp('^' + CARRERA.plan + ' ') },
   tipologia: { id: 'soc4' },
   // Solo para libre elección:
   modoLibre: { id: 'soc5', texto: /^Por facultad y plan$/ },
-  sedeLibre: { id: 'soc10', texto: /1101 SEDE BOGOT/ },
+  sedeLibre: { id: 'soc10', texto: CARRERA.sede },
   facultadLibre: { id: 'soc6' },
   planLibre: { id: 'soc7' },
 };
 const TIP_TODAS = /^TODAS MENOS/;
 const TIP_LIBRE = /^LIBRE ELECCI/;
-const PLAN_QUIMICA = '2519';
+const PLAN_CARRERA = CARRERA.plan;
 const COMPONENTE_LIBRE = '2CLE';
 
 const dormir = ms => new Promise(r => setTimeout(r, ms));
@@ -190,12 +199,17 @@ class Catalogo {
   }
 
   /** Abre el detalle de la fila `n` de la última búsqueda, lo parsea y vuelve. */
-  async detalle(n) {
+  async detalle(n, codigoEsperado) {
     const xml = await this.ppr(`pt1:r1:0:t4:${n}:cl2`, 'action');
     const d = parsearDetalle(xml);
     if (!d.prefijo) throw new Error(`La fila ${n} no abrió una ficha (respuesta de ${xml.length} bytes)`);
     await this.ppr(d.prefijo + 'cb4', 'action');   // Volver a la lista
     delete d.prefijo;
+    /* Si la ficha no es la de la fila pedida, la sesión está desincronizada
+       (pasa tras un error a mitad de camino): mejor reiniciar que guardar mal. */
+    if (codigoEsperado && codigoBase(d.codigo) !== codigoBase(codigoEsperado)) {
+      throw new Error(`La fila ${n} (${codigoEsperado}) abrió otra ficha (${d.codigo} ${d.nombre})`);
+    }
     return d;
   }
 }
@@ -283,7 +297,7 @@ async function conSesion(fn, intentos = 3) {
   throw ultimo;
 }
 
-/** Lista del plan de Química, con todas las tipologías menos libre elección. */
+/** Lista del plan de la carrera, con todas las tipologías menos libre elección. */
 async function listaPlan(cat) {
   const tipologias = await cat.irAlPlan();
   await cat.elegirPor('tipologia', tipologias, TIP_TODAS);
@@ -315,11 +329,20 @@ async function detalles(navegar, etiqueta, maxFallos = 8) {
   let cat = null, filas = null, fallos = 0;
   while (true) {
     try {
-      if (!cat) { cat = new Catalogo(); filas = await navegar(cat); }
+      if (!cat) {
+        cat = new Catalogo();
+        const nuevas = await navegar(cat);
+        // Si la lista cambió respecto a la anterior, lo descargado ya no está alineado.
+        if (filas && (nuevas.length !== filas.length || nuevas.some((f, i) => f.codigo !== filas[i].codigo))) {
+          process.stderr.write('  ⚠ La lista cambió entre sesiones: se empieza de nuevo\n');
+          out.length = 0;
+        }
+        filas = nuevas;
+      }
       while (out.length < filas.length) {
         const f = filas[out.length];
         process.stderr.write(`\r  ${etiqueta}: ${out.length + 1}/${filas.length}  ${f.codigo} ${f.nombre.slice(0, 40).padEnd(40)}`);
-        const d = await cat.detalle(f.fila);
+        const d = await cat.detalle(f.fila, f.codigo);
         out.push(Object.assign({}, f, d, { nombre: limpiarNombre(f.nombre), sinProgramar: sinProgramar(f.nombre) }));
       }
       process.stderr.write('\n');
@@ -346,7 +369,7 @@ function imprimirDetalle(d) {
 async function cmdPlan() {
   const filas = await conSesion(listaPlan);
   for (const f of filas) console.log(`${f.codigo.padEnd(10)} ${String(f.creditos).padStart(2)} cr  ${f.tipologia.padEnd(26)} ${f.nombre}`);
-  console.log(`\n${filas.length} asignaturas del plan ${PLAN_QUIMICA} (sin libre elección)`);
+  console.log(`\n${filas.length} asignaturas del plan ${PLAN_CARRERA} (sin libre elección)`);
 }
 
 async function cmdVer(cod) {
@@ -356,7 +379,7 @@ async function cmdVer(cod) {
     if (!f) {
       const le = await listaLibre(cat);
       f = le.filas.find(x => codigoBase(x.codigo) === codigoBase(cod));
-      if (!f) throw new Error(`El código ${cod} no está en el plan ${PLAN_QUIMICA} ni en el componente ${COMPONENTE_LIBRE}`);
+      if (!f) throw new Error(`El código ${cod} no está en el plan ${PLAN_CARRERA} ni en el componente ${COMPONENTE_LIBRE}`);
     }
     imprimirDetalle(await cat.detalle(f.fila));
   });
@@ -385,7 +408,7 @@ function indexar(lista, origen) {
 
 async function cmdSincronizar(opts) {
   const fecha = new Date().toISOString().slice(0, 10);
-  console.error('Plan de Química (todas las tipologías menos libre elección)…');
+  console.error(`Plan de ${CARRERA.nombre} (${PLAN_CARRERA}, todas las tipologías menos libre elección)…`);
   const plan = (await detalles(listaPlan, 'plan')).detalles;
   let libre = [], planesLibre = [];
   if (!opts.sinLibre) {
@@ -394,7 +417,7 @@ async function cmdSincronizar(opts) {
     libre = (await detalles(async cat => { const l = await listaLibre(cat); nombrePlan = l.plan; return l.filas; }, 'libre')).detalles;
     planesLibre.push(nombrePlan);
   }
-  const oferta = Object.assign(indexar(plan, 'plan ' + PLAN_QUIMICA), indexar(libre, COMPONENTE_LIBRE));
+  const oferta = Object.assign(indexar(plan, 'plan ' + PLAN_CARRERA), indexar(libre, COMPONENTE_LIBRE));
   // Si un código está en ambos, gana la ficha del plan pero se anotan los dos orígenes.
   for (const d of libre) { const c = codigoBase(d.codigo); if (oferta[c] && !oferta[c].origen.includes(COMPONENTE_LIBRE)) oferta[c].origen.push(COMPONENTE_LIBRE); }
 
@@ -407,7 +430,7 @@ async function cmdSincronizar(opts) {
    Fuente: «Catálogo de asignaturas» público del SIA (acceso anónimo, sin sesión).
    Consultado el ${fecha}. Regenerar con: node herramientas/catalogo-sia.js sincronizar
 
-   Contiene el plan ${PLAN_QUIMICA} (Química, todas las tipologías menos libre elección)
+   Contiene el plan ${PLAN_CARRERA} (${CARRERA.nombre}, todas las tipologías menos libre elección)
    ${planesLibre.length ? 'y la libre elección del componente ' + planesLibre.join(', ') + ' de la sede Bogotá' : 'sin libre elección'}.
    ${Object.keys(oferta).length} asignaturas, ${conGrupos} con grupos programados, ${nGrupos} grupos.
    Los cupos son los del momento de la consulta; cambian a diario en inscripción.
@@ -422,6 +445,76 @@ const OFERTA = ${JSON.stringify(oferta, null, 1)};
 `;
   fs.writeFileSync(ARCHIVO, salida);
   console.error(`\nEscrito ${path.relative(RAIZ, ARCHIVO)}: ${Object.keys(oferta).length} asignaturas, ${conGrupos} con grupos, ${nGrupos} grupos. Periodo ${periodo || '?'}.`);
+}
+
+/** Escribe carreras/<slug>/electivas.js a partir de la libre elección de carreras/<slug>/oferta.js (componente
+    2CLE), con el formato que espera la pestaña Electivas de la app. Sirve cuando el
+    catálogo «Contenido de asignaturas» (herramientas/electivas.js) no responde. */
+function cmdElectivas() {
+  const vm = require('vm'), ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(ARCHIVO, 'utf8') + ';this.O = OFERTA; this.F = OFERTA_CONSULTADO', ctx);
+  const lista = Object.values(ctx.O).filter(a => a.origen.includes(COMPONENTE_LIBRE)).map(a => ({
+    cod: a.cod, nombre: a.nombre, vigente: true, unidad: null, creditos: a.creditos, horas: null, validable: null,
+    planes: [{ cod: COMPONENTE_LIBRE, nombre: 'COMPONENTE DE LIBRE ELECCIÓN' }],
+    enPlan: a.origen.some(o => o.startsWith('plan ')), sinProgramar: !!a.sinProgramar,
+    descripcion: a.descripcion || null,
+  })).sort((x, y) => x.nombre.localeCompare(y.nombre, 'es'));
+  const salida = `/* ============================================================================
+   electivas.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
+   Electivas de LIBRE ELECCIÓN: las ${lista.length} asignaturas del componente ${COMPONENTE_LIBRE} de la
+   sede Bogotá según el Catálogo de asignaturas del SIA (consultado el ${ctx.F}).
+   Regenerar con: node herramientas/catalogo-sia.js sincronizar && node herramientas/catalogo-sia.js electivas
+   ========================================================================== */
+
+const ELECTIVAS_ACTUALIZADO = '${ctx.F}';
+const ELECTIVAS_FUENTE = 'electivas de libre elección del componente ${COMPONENTE_LIBRE} de la sede, según el Catálogo del SIA';
+
+const ELECTIVAS = ${JSON.stringify(lista, null, 1)};
+`;
+  fs.writeFileSync(path.join(DIR_CARRERA, 'electivas.js'), salida);
+  console.error(`Escrito carreras/${SLUG_CARRERA}/electivas.js: ${lista.length} electivas.`);
+}
+
+/** Escribe carreras/<slug>/sia.js (fichas «código|nombre» que usa la app) a partir de carreras/<slug>/oferta.js,
+    para las asignaturas de carreras/<slug>/datos.js (plan y catálogo). Es un sustituto de
+    `herramientas/sia.js enriquecer` mientras «Contenido de asignaturas» no responda:
+    trae créditos y descripción, pero no temario ni horas. */
+function cmdFichas() {
+  const vm = require('vm'), ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(ARCHIVO, 'utf8') + ';this.O = OFERTA; this.F = OFERTA_CONSULTADO', ctx);
+  const d = vm.createContext({});
+  const { PLAN_BASE, CATALOGO } = vm.runInContext(fs.readFileSync(path.join(DIR_CARRERA, 'datos.js'), 'utf8') + '\n;({ PLAN_BASE, CATALOGO })', d);
+  const fichas = {};
+  let n = 0;
+  for (const a of [...PLAN_BASE, ...CATALOGO]) {
+    if (!a.cod) continue;
+    const o = ctx.O[codigoBase(a.cod)];
+    if (!o) continue;
+    fichas[a.cod + '|' + a.nombre] = {
+      cod: a.cod, nombre: o.nombre, vigente: !o.sinProgramar, unidad: null, creditos: o.creditos,
+      semanas: null, horas: null, validable: null, asistencia: null, libreEleccion: null,
+      descripcion: o.descripcion || null, contenido: null, tipologia: o.tipologia, via: 'catalogo-sia',
+    };
+    n++;
+  }
+  const salida = `/* ============================================================================
+   sia.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
+   Fichas derivadas del Catálogo de asignaturas del SIA (carreras/<slug>/oferta.js), consultado
+   el ${ctx.F}. Traen créditos, tipología y descripción; no temario ni horas.
+   Cuando «Contenido de asignaturas» vuelva a responder, sustituir con:
+   node herramientas/sia.js enriquecer
+   Regenerar con: node herramientas/catalogo-sia.js fichas
+   ========================================================================== */
+
+const SIA_CONSULTADO = '${ctx.F}';
+
+/* "código|nombre de la malla" -> ficha */
+const SIA = ${JSON.stringify(fichas, null, 1)};
+`;
+  fs.writeFileSync(path.join(DIR_CARRERA, 'sia.js'), salida);
+  console.error(`Escrito carreras/${SLUG_CARRERA}/sia.js: ${n} fichas.`);
 }
 
 /** Deduce el periodo académico (p.ej. 2026-2) de las fechas de las sesiones. */
@@ -443,9 +536,11 @@ if (require.main === module) {
     ver: () => arg ? cmdVer(arg) : Promise.reject(new Error('Falta el código')),
     libre: () => cmdLibre(arg && !arg.startsWith('--') ? arg : undefined),
     sincronizar: () => cmdSincronizar(opts),
+    electivas: () => Promise.resolve(cmdElectivas()),
+    fichas: () => Promise.resolve(cmdFichas()),
   }[cmd];
   if (!run) {
-    console.log('Uso:\n  node herramientas/catalogo-sia.js plan\n  node herramientas/catalogo-sia.js ver <código>\n  node herramientas/catalogo-sia.js libre [plan]\n  node herramientas/catalogo-sia.js sincronizar [--sin-libre]');
+    console.log('Uso:\n  node herramientas/catalogo-sia.js plan\n  node herramientas/catalogo-sia.js ver <código>\n  node herramientas/catalogo-sia.js libre [plan]\n  node herramientas/catalogo-sia.js sincronizar [--sin-libre]\n  node herramientas/catalogo-sia.js electivas\n  node herramientas/catalogo-sia.js fichas');
     process.exit(cmd ? 1 : 0);
   }
   run().catch(e => { console.error('Error:', e.message); process.exit(1); });

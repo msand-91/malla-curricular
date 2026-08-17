@@ -27,7 +27,11 @@ const path = require('path');
 const vm = require('vm');
 
 const RAIZ = path.resolve(__dirname, '..');
-const ARCHIVO = path.join(RAIZ, 'js/electivas.js');
+/* Todo lo de la carrera vive en carreras/<slug>/ (--carrera=<slug>). */
+const { resolverCarrera, argvSinCarrera } = require('./_carrera');
+const { slug: SLUG_CARRERA, dir: DIR_CARRERA, carrera: CARRERA_ACTUAL } = resolverCarrera();
+process.argv = argvSinCarrera();
+const ARCHIVO = path.join(DIR_CARRERA, 'electivas.js');
 const SIA = 'https://siabog.unal.edu.co/academia/apoyo-administrativo/ConsultaContenidos.do';
 const PAUSA_MS = 350;
 /* Tope de fichas nuevas que se revisan por tema, para no disparar el barrido. */
@@ -35,11 +39,11 @@ const MAX_POR_TEMA = 45;
 
 /* Marcadores del SIA que identifican una asignatura de libre elección. */
 const PLANES_LIBRE = ['2PEL', '2CLE'];
-/* Plan de Química: sirve para destacar las más cercanas a la carrera. */
-const PLAN_QUIMICA = '2519';
+/* Plan de la carrera (js/carrera.js): sirve para destacar las más cercanas a ella. */
+const PLAN_QUIMICA = CARRERA_ACTUAL.plan;
 
 /* Temas del barrido por defecto: cubren las líneas donde suele haber electivas
-   interesantes para alguien de Química, más las de formación general. */
+   interesantes para alguien de la carrera, más las de formación general. */
 const TEMAS = [
   'arte', 'musica', 'cine', 'literatura', 'narrativa', 'escritura', 'lectura',
   'historia', 'filosofia', 'etica', 'politica', 'sociedad', 'cultura', 'genero',
@@ -78,7 +82,7 @@ const ETIQUETAS = new Set(['asignatura vigente', 'nombre asignatura', 'unidad ac
 async function pedir(params) {
   const url = SIA + '?' + new URLSearchParams(Object.assign(
     { action: '', idAsignatura: '', idSession_hd: '', txtIdAsignatura: '', txtNombreAsignatura: '' }, params));
-  const r = await fetch(url, { headers: { 'user-agent': 'malla-curricular-quimica/1.0' }, signal: AbortSignal.timeout(40000) });
+  const r = await fetch(url, { headers: { 'user-agent': 'malla-curricular-unal/1.0' }, signal: AbortSignal.timeout(40000) });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return new TextDecoder('iso-8859-1').decode(await r.arrayBuffer());
 }
@@ -222,7 +226,7 @@ async function barrer(temas) {
   console.log(`Total en catálogo  : ${salida.length}`);
   console.log(`  del plan Química : ${salida.filter(e => e.enPlanQuimica).length}`);
   console.log(`  con descripción  : ${salida.filter(e => e.descripcion).length}`);
-  console.log(`\nEscrito js/electivas.js`);
+  console.log(`\nEscrito carreras/${SLUG_CARRERA}/electivas.js`);
 }
 
 /**
@@ -231,7 +235,7 @@ async function barrer(temas) {
  * «…»), créditos, si sigue vigente y si de verdad cuenta como libre elección.
  */
 async function importar() {
-  const ruta = path.join(RAIZ, 'datos/electivas-listado.txt');
+  const ruta = path.join(DIR_CARRERA, 'datos-fuente/electivas-listado.txt');
   if (!fs.existsSync(ruta)) {
     console.error(`Falta ${path.relative(RAIZ, ruta)}.`);
     process.exit(1);
@@ -300,7 +304,7 @@ async function importar() {
     console.log(`\nSin ficha en el catálogo público (verificar en el SIA):`);
     for (const n of sinFicha) console.log(`  ${n.cod.padEnd(10)} ${n.nombre}`);
   }
-  console.log(`\nEscrito js/electivas.js`);
+  console.log(`\nEscrito carreras/${SLUG_CARRERA}/electivas.js`);
 }
 
 (async () => {

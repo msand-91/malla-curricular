@@ -1,9 +1,11 @@
 const { JSDOM } = require('jsdom');
 const fs = require('fs');
-const dir = require('path').resolve(__dirname, '..');
+const dir = require('path').resolve(__dirname, '../../..');   // raíz del repositorio
+const cdir = require('path').resolve(__dirname, '..');        // carreras/<slug>
+const slug = require('path').basename(cdir);
 
 const errores = [];
-const dom = new JSDOM(fs.readFileSync(dir + '/index.html', 'utf8'), {
+const dom = new JSDOM(fs.readFileSync(dir + '/' + slug + '/index.html', 'utf8'), {
   runScripts: 'outside-only', url: 'http://localhost/', pretendToBeVisual: true,
 });
 const w = dom.window;
@@ -11,11 +13,12 @@ w.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
 w.HTMLDialogElement.prototype.close = function () { this.open = false; };
 w.onerror = (m) => errores.push('window.onerror: ' + m);
 
-const src = fs.readFileSync(dir + '/js/losestudiantes.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/sia.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/electivas.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/oferta.js', 'utf8') + '\n'
-  + fs.readFileSync(dir + '/js/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
+const src = fs.readFileSync(cdir + '/carrera.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/losestudiantes.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/sia.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/electivas.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/oferta.js', 'utf8') + '\n'
+  + fs.readFileSync(cdir + '/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
 w.eval(src + '\n;window.__api = { get S(){return S}, get PLAN(){return PLAN},'
   + ' get PLAN_POR_ID(){return PLAN_POR_ID}, CATALOGO, guardar, refrescar, construirPlan,'
   + ' moverAsignatura, abrirEditor, OFERTA_MAP };');

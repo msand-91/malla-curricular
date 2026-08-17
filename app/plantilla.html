@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITULO}} · UNAL Bogotá</title>
+<link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="logo" data-texto="logo">🎓</div>
+  <div>
+    <h1 data-texto="titulo">Malla curricular</h1>
+    <p class="sub" data-texto="subtitulo">Universidad Nacional de Colombia · Sede Bogotá</p>
+  </div>
+  <a class="btn-tema" href="../" style="text-decoration:none" title="Elegir otra carrera">☰ Carreras</a>
+  <div class="crece"></div>
+  <button class="btn-tema" id="btnTema">◐ Auto</button>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button data-vista="vMalla"     role="tab" aria-selected="true">Malla</button>
+  <button data-vista="vResumen"   role="tab" aria-selected="false">Mi avance</button>
+  <button data-vista="vPlan"      role="tab" aria-selected="false">Plan sugerido</button>
+  <button data-vista="vCatalogo"  role="tab" aria-selected="false">Optativas</button>
+  <button data-vista="vElectivas" role="tab" aria-selected="false">Electivas</button>
+  <button data-vista="vHorario"   role="tab" aria-selected="false">Horario</button>
+  <button data-vista="vNotas"     role="tab" aria-selected="false">Notas y fuentes</button>
+</nav>
+<div class="barra-progreso-global"><div id="progGlobal" style="width:0%"></div></div>
+
+<main>
+
+  <!-- ============================== MALLA ============================== -->
+  <section class="vista" id="vMalla">
+    <div class="toolbar">
+      <input type="search" id="busca" placeholder="Buscar asignatura o código…">
+      <label><input type="checkbox" id="chkDisp"> Solo lo que puedo inscribir</label>
+      <button class="btn" id="btnNivelacion" title="Marca las asignaturas de nivelación (inglés, matemáticas básicas…) como exentas u homologadas" hidden>Nivelación: exento</button>
+      <button class="btn" id="btnEdicion">✎ Editar malla</button>
+      <button class="btn" id="btnLimpiarResalte" hidden>Quitar resalte</button>
+    </div>
+    <details class="acordeon" id="ayudaMalla">
+      <summary>¿Cómo funciona?</summary>
+      <div>
+        Toca cualquier asignatura para marcarla como <b>cursando</b>, <b>aprobada</b> u
+        <b>homologada / exenta</b> (validada, reconocida o exenta por examen: cuenta como aprobada), elegir la
+        optativa que la llena, ver qué desbloquea y abrir sus profesores y reseñas.
+        Tu avance se guarda en este navegador.
+        <div class="leyenda" style="margin-top:10px">
+          <span><i class="sw" style="background:var(--ok-bg);border-left:3px solid var(--ok)"></i>Aprobada</span>
+          <span><i class="sw" style="background:var(--ok-bg);border-left:3px dashed var(--ok)"></i>Homologada / exenta</span>
+          <span><i class="sw" style="background:var(--curso-bg);border-left:3px solid var(--curso)"></i>Cursando</span>
+          <span><i class="sw" style="background:var(--panel);border-left:3px solid var(--disp)"></i>Disponible</span>
+          <span><i class="sw" style="background:var(--bloq-bg)"></i>Bloqueada</span>
+        </div>
+      </div>
+    </details>
+    <div class="aviso" id="barraEdicion" hidden>
+      <p style="margin:0 0 10px">
+        <b>Modo edición.</b> Usa los botones <b>‹ ›</b> de cada asignatura para cambiarla de
+        semestre — en computador también puedes arrastrarlas. Ábrela y pulsa
+        <b>Editar asignatura</b> para cambiar créditos, código o requisitos.
+        Las que muevas quedan marcadas con ✎.<span id="contadorMods"></span>
+      </p>
+      <button class="btn" id="btnRestaurarMalla">Restaurar malla original</button>
+    </div>
+    <div class="malla" id="malla"></div>
+  </section>
+
+  <!-- ============================= RESUMEN ============================= -->
+  <section class="vista" id="vResumen" hidden>
+    <div class="toolbar">
+      <button class="btn" id="btnExportar">Exportar avance (.json)</button>
+      <label class="btn" style="cursor:pointer">Importar respaldo
+        <input type="file" id="fileImportar" accept="application/json" hidden></label>
+      <div class="sep"></div>
+      <button class="btn peligro" id="btnReiniciar">Reiniciar todo</button>
+    </div>
+    <div class="grid-tarjetas" id="resumenKpis" style="margin-bottom:16px"></div>
+    <div class="grid-tarjetas" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+      <div class="panel" id="resumenComponentes"></div>
+      <div class="panel" id="resumenRanuras"></div>
+    </div>
+  </section>
+
+  <!-- =============================== PLAN ============================== -->
+  <section class="vista" id="vPlan" hidden>
+    <div class="toolbar">
+      <label>Máx. créditos por semestre
+        <input type="number" id="numMax" min="6" max="26" step="1" value="18" style="width:70px"></label>
+      <label>Criterio
+        <select id="selModo">
+          <option value="critico">Ruta crítica — graduarme lo antes posible</option>
+          <option value="malla">Orden de la malla — seguir el semestre sugerido</option>
+        </select></label>
+      <label><input type="checkbox" id="chkNivel" checked> No adelantar optativas por encima de mi nivel</label>
+    </div>
+    <div class="aviso">
+      El plan respeta prerrequisitos y correquisitos y agrupa los pares que deben inscribirse juntos
+      (p. ej. <span data-texto="ejemploPar">una teórica y su laboratorio</span>). El modo <b>ruta crítica</b> prioriza las
+      asignaturas de las que más cosas dependen, para no quedar frenado más adelante.
+    </div>
+    <div id="planCont"></div>
+  </section>
+
+  <!-- ============================= CATÁLOGO ============================ -->
+  <section class="vista" id="vCatalogo" hidden>
+    <div class="toolbar">
+      <input type="search" id="buscaCat" placeholder="Buscar por tema…" data-texto-placeholder="buscaCatalogo">
+      <label>Grupo
+        <select id="selGrupo">
+          <option value="">Todos</option>
+          <!-- el resto se genera desde GRUPOS_CATALOGO (js/datos.js) -->
+        </select></label>
+    </div>
+    <p style="font-size:13px;color:var(--texto-2);margin:-6px 0 14px" data-texto-html="catalogo">
+      Las optativas del plan, con sus créditos reales y su descripción. Para asignar una a un cupo, ábrelo desde la pestaña <b>Malla</b>.
+    </p>
+    <div id="catCont"></div>
+  </section>
+
+  <!-- ============================ ELECTIVAS ============================ -->
+  <section class="vista" id="vElectivas" hidden>
+    <div class="toolbar">
+      <input type="search" id="buscaEle" placeholder="Buscar por tema: cine, ética, datos, música…">
+      <label>Ordenar
+        <select id="ordEle">
+          <option value="nombre">Nombre</option>
+          <option value="creditos">Créditos</option>
+          <option value="unidad">Facultad o departamento</option>
+        </select></label>
+      <label><input type="checkbox" id="chkEleVig" checked> Solo vigentes</label>
+      <label><input type="checkbox" id="chkEleDesc"> Solo con descripción</label>
+    </div>
+    <div class="aviso" data-texto-html="electivas">
+      <b>Electivas ≠ optativas.</b> Estas son las de <b>libre elección</b>, que puedes llenar con casi cualquier asignatura de la Universidad. Las <b>optativas</b> están en la pestaña anterior.
+    </div>
+    <p style="font-size:13px;color:var(--texto-2);margin:-6px 0 14px" id="ayudaEle"></p>
+    <div id="eleCont"></div>
+  </section>
+
+  <!-- ============================== HORARIO ============================ -->
+  <section class="vista" id="vHorario" hidden>
+    <div class="toolbar">
+      <input type="search" id="buscaHor" placeholder="Añadir asignatura por nombre o código…" autocomplete="off">
+      <span id="horPeriodo" style="font-size:12.5px;color:var(--texto-2)"></span>
+    </div>
+    <div id="horSugerencias" class="sugerencias" hidden></div>
+    <div class="aviso" id="horAviso">
+      Aquí armas el horario del semestre con la <b>oferta real del SIA</b> (grupos, profesores, salones y
+      cupos). Entran solas las asignaturas que marques como <b>Cursando</b> en la malla; también puedes
+      añadir cualquier otra con el buscador. Elige un grupo por asignatura y la semana se pinta abajo;
+      los cruces se marcan en rojo. Debajo, <b>«¿Qué cabe en mis huecos?»</b> busca en toda la oferta los grupos que no se cruzan con lo que ya tienes — obligatorias del plan que ya puedes ver, optativas y libre elección — y los añade con un clic. Puedes guardar <b>varios horarios</b> (A, B, C…) y compararlos, y <b>Optimizar</b> prueba todas las combinaciones de grupos de tus asignaturas y propone las mejores según lo que prefieras (menos días, menos huecos, empezar tarde o terminar temprano). Los cupos son los del día de la consulta.
+    </div>
+    <div id="horCont"></div>
+  </section>
+
+  <!-- ============================== NOTAS ============================== -->
+  <section class="vista" id="vNotas" hidden>
+    <div class="panel" style="margin-bottom:16px">
+      <h3>Fuentes</h3>
+      <p style="font-size:13.5px;color:var(--texto-2);margin:0">
+        <span data-texto-html="fuentes"></span>
+        <b>Catálogo de asignaturas del SIA</b> — oferta del semestre: grupos, profesores, horarios,
+        salones y cupos (pestaña <i>Horario</i> y ficha de cada asignatura). Es el acceso público,
+        sin sesión; se actualiza con <code>node herramientas/catalogo-sia.js sincronizar</code>.
+      </p>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <h3>Sobre los profesores y las reseñas</h3>
+      <p style="font-size:13.5px;color:var(--texto-2);margin:0 0 10px">
+        Al abrir una asignatura verás los profesores que la dictan, con dos números distintos:
+        <b>Calif.</b> es la calificación promedio que le dan a ese profesor quienes lo reseñan, y
+        <b>Nota</b> es la nota promedio que esas mismas personas dicen haber sacado. Ambas sobre 5.
+      </p>
+      <p style="font-size:13.5px;color:var(--texto-2);margin:0">
+        <b>El texto de las reseñas se lee en el sitio, no aquí.</b> losestudiantes.com no permite
+        que otras páginas consulten sus datos (no envía cabeceras CORS), y buena parte del texto
+        solo se ve con sesión iniciada. Por eso los profesores se traen una sola vez desde la línea
+        de comandos y quedan guardados dentro de la app; el listado de cada materia muestra hasta
+        unos 9, que es lo que publica el panel del sitio. Se actualiza con
+        <code>node herramientas/sincronizar-profesores.js</code>.
+      </p>
+    </div>
+    <div class="aviso">
+      <span data-texto-html="notas">Abajo está lo que se sabe de cada fuente y qué dato usa esta app.</span> <b>Confirma siempre en el SIA antes de inscribir.</b>
+    </div>
+    <div id="notasCont"></div>
+  </section>
+
+</main>
+
+<dialog class="detalle" id="detalle"></dialog>
+
+<script src="../carreras/{{SLUG}}/carrera.js"></script>
+<script src="../carreras/{{SLUG}}/losestudiantes.js"></script>
+<script src="../carreras/{{SLUG}}/sia.js"></script>
+<script src="../carreras/{{SLUG}}/electivas.js"></script>
+<script src="../carreras/{{SLUG}}/oferta.js"></script>
+<script src="../carreras/{{SLUG}}/datos.js"></script>
+<script src="../js/app.js"></script>
+</body>
+</html>

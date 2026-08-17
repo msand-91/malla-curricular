@@ -1,4 +1,53 @@
-# Malla curricular interactiva — Pregrado en Química, UNAL Bogotá
+# Mallas curriculares interactivas — UNAL Sede Bogotá
+
+Una sola app para varias carreras: **Química** (plan 2519), **Biología** (2513) e **Ingeniería de
+Sistemas y Computación** (2A74). Marca lo aprobado, mira qué puedes inscribir, elige optativas,
+genera un plan de los semestres que faltan y **arma y optimiza el horario con la oferta real del
+SIA**.
+
+- Portada con el selector de carrera: [index.html](index.html) → `/quimica/`, `/biologia/`, `/sistemas/`.
+- Sin servidor ni build: HTML + CSS + JS estáticos. El avance se guarda en el navegador, por carrera.
+
+## Estructura
+
+```
+index.html                 portada (generada)
+<slug>/index.html          la app de cada carrera (generada desde app/plantilla.html)
+app/plantilla.html         la interfaz, una sola vez; los textos por carrera vienen de carrera.js
+js/app.js  css/            motor, planificador, editor, horario, optimizador (genérico)
+carreras/<slug>/           lo específico de cada carrera:
+   carrera.js                nombre, plan del SIA, textos, clave de guardado   [a mano]
+   datos.js                  plan de estudios, catálogo de optativas y notas    [a mano]
+   oferta.js sia.js electivas.js losestudiantes.js   generados desde el SIA / losestudiantes
+   fuentes/  tests/  CONTEXTO.md
+herramientas/              scripts; todos aceptan --carrera=<slug>
+tests/correr.js            corre las pruebas de todas las carreras
+dist/                      paquetes autocontenidos por carrera
+```
+
+## Herramientas
+
+```bash
+node herramientas/generar.js                                # <slug>/index.html + portada
+node herramientas/catalogo-sia.js --carrera=quimica plan    # asignaturas del plan en el SIA
+node herramientas/catalogo-sia.js --carrera=quimica sincronizar   # oferta → carreras/quimica/oferta.js
+node herramientas/catalogo-sia.js --carrera=quimica electivas     # electivas.js desde la libre elección
+node herramientas/catalogo-sia.js --carrera=quimica fichas        # sia.js (créditos, descripción) desde oferta.js
+node herramientas/sia.js --carrera=quimica enriquecer       # fichas completas cuando «Contenido de asignaturas» responda
+node herramientas/verificar-losestudiantes.js --carrera=quimica --catalogo
+node herramientas/sincronizar-profesores.js --carrera=quimica     # necesita Chrome
+node herramientas/estado-sia.js                              # ¿qué servicios del SIA responden?
+node herramientas/empaquetar.js --carrera=quimica            # dist/malla-quimica.html
+node tests/correr.js [--carrera=quimica]
+```
+
+Para añadir una carrera: crea `carreras/<slug>/carrera.js` y `datos.js`, corre `catalogo-sia.js
+sincronizar`, `electivas`, `fichas` y `verificar-losestudiantes.js`, y luego `generar.js`.
+
+---
+
+## Química (el proyecto original)
+
 
 App web para planear el avance en el plan de estudios: marcar lo aprobado, ver
 qué se puede inscribir, elegir optativas del catálogo y generar un plan de los

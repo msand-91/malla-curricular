@@ -3,7 +3,9 @@
    ========================================================================== */
 'use strict';
 
-const CLAVE_LS = 'mallaQuimicaUNAL.v1';
+const CARRERA_APP = typeof CARRERA === 'object' ? CARRERA : {};
+const CLAVE_LS = CARRERA_APP.claveLS || 'mallaQuimicaUNAL.v1';
+const NOMBRE_CARRERA = CARRERA_APP.nombre || 'Química';
 const ROMANOS = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
 /* ------------------------------------------------------------------ estado */
@@ -55,8 +57,20 @@ function construirPlan() {
       c.pre = (c.pre || []).filter(p => !fuera.has(p));
       c.co = (c.co || []).filter(p => !fuera.has(p));
       c.preSug = (c.preSug || []).filter(p => !fuera.has(p));
+      /* Si es un cupo con una optativa asignada y el catálogo conoce los
+         requisitos de esa optativa, el cupo los hereda. */
+      const asig = c.ranura && S.ranuras[c.id];
+      const opt = asig && asig.cod && CATALOGO.find(o => o.cod === asig.cod && (o.pre || o.preEsp || o.preFund));
+      if (opt) {
+        c.pre = [...new Set([...c.pre, ...(opt.pre || []).filter(p => !fuera.has(p))])];
+        if (opt.preEsp) c.preEsp = opt.preEsp;
+        if (opt.preFund) c.preFund = true;
+      }
       return c;
     });
+  // Prerrequisitos heredados que apunten a asignaturas fuera del plan se descartan.
+  const enPlan = new Set(arr.map(a => a.id));
+  for (const c of arr) c.pre = c.pre.filter(p => enPlan.has(p));
 
   // Orden explícito (arrastrar y soltar); las nuevas van al final de su semestre.
   if (m.orden && m.orden.length) {
@@ -97,9 +111,11 @@ function setAprobadas() {
  * Solo Trabajo de Grado lo tiene de forma evaluable.
  */
 function cumplePreEspecial(a, hechas) {
-  if (a.id !== '2015281') return true;
+  // Trabajo de grado, y cualquier asignatura marcada con preFund, exigen toda la
+  // fundamentación (y la disciplinar obligatoria, si la carrera la tiene).
+  if (a.comp !== 'TG' && !a.preFund) return true;
   return PLAN.every(x =>
-    x.id === '2015281' ||
+    x.comp === 'TG' || x.id === a.id ||
     !['FO', 'FP', 'DO'].includes(x.comp) ||
     hechas.has(x.id));
 }
@@ -269,11 +285,13 @@ function metricas() {
   for (const k of Object.keys(COMPONENTES)) r.comp[k] = { hecho: 0, cursando: 0, meta: COMPONENTES[k].creditos, plan: 0 };
   for (const a of PLAN) {
     const c = creditos(a), e = est(a.id);
+    // Los componentes con noCuenta (nivelación) no suman al total del plan.
+    const cuenta = !(COMPONENTES[a.comp] && COMPONENTES[a.comp].noCuenta);
     r.comp[a.comp].plan += c;
-    if (e === 'aprobada' || e === 'homologada') { r.comp[a.comp].hecho += c; r.total.hecho += c; }
-    else if (e === 'cursando') { r.comp[a.comp].cursando += c; r.total.cursando += c; }
+    if (e === 'aprobada' || e === 'homologada') { r.comp[a.comp].hecho += c; if (cuenta) r.total.hecho += c; }
+    else if (e === 'cursando') { r.comp[a.comp].cursando += c; if (cuenta) r.total.cursando += c; }
   }
-  r.total.plan = PLAN.reduce((s, a) => s + creditos(a), 0);
+  r.total.plan = PLAN.filter(a => !(COMPONENTES[a.comp] && COMPONENTES[a.comp].noCuenta)).reduce((s, a) => s + creditos(a), 0);
   return r;
 }
 
@@ -634,7 +652,14 @@ function abrirDetalle(id) {
       opciones = `<div class="campo"><label>Asignar optativa del catálogo</label>
         <select id="selRanura">
           <option value="">— sin asignar —</option>
-          ${items.map(c => `<option value="${esc(c.cod)}|${esc(c.nombre)}" ${asig.cod === c.cod && asig.nombre === c.nombre ? 'selected' : ''}>${esc(c.nombre)} (${esc(c.cod)})${c.codErrado ? ' ⚠' : ''}</option>`).join('')}
+          ${(() => {
+            const op = c => `<option value="${esc(c.cod)}|${esc(c.nombre)}" ${asig.cod === c.cod && asig.nombre === c.nombre ? 'selected' : ''}>${esc(c.nombre)} (${esc(c.cod)})${c.codErrado ? ' ⚠' : ''}</option>`;
+            // Si el cupo admite varios grupos del catálogo, se agrupan para no perderse en la lista.
+            const gruposPresentes = grupos.filter(g => items.some(c => c.grupo === g));
+            return gruposPresentes.length > 1
+              ? gruposPresentes.map(g => `<optgroup label="${esc(GRUPOS_CATALOGO[g] || g)}">${items.filter(c => c.grupo === g).map(op).join('')}</optgroup>`).join('')
+              : items.map(op).join('');
+          })()}
         </select>
         ${elegida && elegida.codErrado ? `<div class="nota-box" style="margin-top:8px"><b>⚠ El código de esta optativa está mal en el PDF</b>
           ${esc(elegida.nota || `El código ${elegida.cod} pertenece a otra asignatura.`)}</div>` : ''}
@@ -1148,17 +1173,17 @@ function pintarElectivas() {
 
   const nVig = LISTA_ELECTIVAS.filter(e => e.vigente !== false).length;
   const nCad = LISTA_ELECTIVAS.length - nVig;
-  $('#ayudaEle').innerHTML = `${LISTA_ELECTIVAS.length} electivas del Departamento de Electivas,
-    contrastadas una a una con el SIA${nCad ? `: <b>${nVig} vigentes</b> y ${nCad} caducada(s)` : ''}.
+  const fuenteEle = typeof ELECTIVAS_FUENTE === 'string' ? ELECTIVAS_FUENTE : 'electivas del Departamento de Electivas, contrastadas una a una con el SIA';
+  $('#ayudaEle').innerHTML = `${LISTA_ELECTIVAS.length} ${fuenteEle}${nCad ? `: <b>${nVig} vigentes</b> y ${nCad} caducada(s)` : ''}.
     Mostrando <b>${items.length}</b>. Tienes <b>${libres.length} de ${cupos.length}</b> cupos de
     electiva sin asignar (${cupos.reduce((s, a) => s + creditos(a), 0)} créditos en total).
-    ★ = el SIA la asocia al plan de Química.`;
+    ★ = el SIA la asocia al plan de ${esc(NOMBRE_CARRERA)}.`;
 
   $('#eleCont').innerHTML = items.length ? `<div class="cat-grid">${items.map(e => {
     const slot = usadas.get(e.cod);
     return `<div class="cat-item ${slot ? 'usada' : ''}">
       <div class="cat-nom">${esc(e.nombre)}
-        ${e.enPlanQuimica ? '<span class="bien" title="El SIA la asocia al plan de Química">★</span>' : ''}
+        ${e.enPlan || e.enPlanQuimica ? `<span class="bien" title="El SIA la asocia al plan de ${esc(NOMBRE_CARRERA)}">★</span>` : ''}
         ${e.vigente === false ? '<span class="warn" title="El SIA la marca como no vigente">✗</span>' : ''}</div>
       <div class="c">${esc(e.cod)}${e.creditos != null ? ` · <b>${e.creditos} créditos</b>` : ''}${e.horas != null ? ` · ${e.horas} h` : ''}${e.validable ? ' · validable' : ''}</div>
       ${e.unidad ? `<div class="c">${esc(e.unidad)}</div>` : ''}
@@ -1646,6 +1671,7 @@ function irA(id) {
 }
 
 function refrescar() {
+  construirPlan();   // los cupos heredan requisitos de la optativa asignada
   pintarMalla();
   pintarResumen();
   if (!$('#vPlan').hidden) pintarPlan();
@@ -1653,7 +1679,7 @@ function refrescar() {
   if (!$('#vElectivas').hidden) pintarElectivas();
   if (!$('#vHorario').hidden) pintarHorario();
   const m = metricas();
-  $('#progGlobal').style.width = (m.total.hecho / m.total.meta * 100) + '%';
+  $('#progGlobal').style.width = Math.min(100, m.total.hecho / m.total.meta * 100) + '%';
 
   const n = Object.keys(S.mods.editados).length + S.mods.nuevos.length + S.mods.eliminados.length;
   $('#contadorMods').textContent = n ? ` ${n} asignatura(s) con cambios.` : '';
@@ -1663,7 +1689,24 @@ function refrescar() {
 /* -------------------------------------------------------------------- init */
 function init() {
   construirPlan();
+  // Textos de la carrera (título, subtítulo, fuentes…) desde carreras/<slug>/carrera.js.
+  const T = Object.assign({}, CARRERA_APP.textos || {});
+  ['titulo', 'subtitulo', 'logo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
+  $$('[data-texto]').forEach(el => { const v = T[el.dataset.texto]; if (v != null) el.textContent = v; });
+  $$('[data-texto-html]').forEach(el => { const v = T[el.dataset.textoHtml]; if (v != null) el.innerHTML = v; });
+  $$('[data-texto-placeholder]').forEach(el => { const v = T[el.dataset.textoPlaceholder]; if (v != null) el.placeholder = v; });
+  if (CARRERA_APP.titulo) document.title = CARRERA_APP.titulo + ' · UNAL Bogotá';
+  // El atajo de nivelación solo tiene sentido si la carrera tiene componentes que no cuentan.
+  const bNiv0 = $('#btnNivelacion');
+  if (bNiv0) bNiv0.hidden = !Object.values(COMPONENTES).some(c => c.noCuenta);
   pintarNotas();
+  // Grupos del catálogo de optativas: vienen de datos.js, no del HTML.
+  const selG = $('#selGrupo');
+  if (selG && selG.options.length <= 1) {
+    for (const [gid, gnom] of Object.entries(GRUPOS_CATALOGO)) {
+      const o = document.createElement('option'); o.value = gid; o.textContent = gnom; selG.appendChild(o);
+    }
+  }
   $('#numMax').value = S.config.maxCr;
 
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => irA(b.dataset.vista)));
@@ -1831,6 +1874,15 @@ function init() {
   $('#buscaHor').addEventListener('input', sugerirHorario);
   $('#buscaHor').addEventListener('focus', sugerirHorario);
   $('#btnLimpiarResalte').addEventListener('click', () => { resaltado = null; refrescar(); });
+  // Nivelación (inglés, matemáticas básicas, lecto-escritura): no todo el mundo la cursa.
+  const bNiv = $('#btnNivelacion');
+  if (bNiv) bNiv.addEventListener('click', () => {
+    const niv = PLAN.filter(a => COMPONENTES[a.comp] && COMPONENTES[a.comp].noCuenta);
+    const todasExentas = niv.every(a => est(a.id) === 'homologada');
+    niv.forEach(a => { if (todasExentas) delete S.estado[a.id]; else S.estado[a.id] = 'homologada'; });
+    guardar(); refrescar();
+    avisar(todasExentas ? 'Nivelación devuelta a pendiente.' : `${niv.length} asignaturas de nivelación marcadas como exentas.`);
+  });
   $('#selModo').addEventListener('change', pintarPlan);
   $('#numMax').addEventListener('change', pintarPlan);
   $('#chkNivel').addEventListener('change', pintarPlan);
@@ -1855,7 +1907,7 @@ function init() {
     const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'avance-malla-quimica.json';
+    a.download = CARRERA_APP.archivoAvance || 'avance-malla-quimica.json';
     a.click(); URL.revokeObjectURL(a.href);
   });
   $('#fileImportar').addEventListener('change', e => {
