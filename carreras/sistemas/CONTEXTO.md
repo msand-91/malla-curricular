@@ -9,4 +9,5 @@ con círculos numerados) y `pep_enfasis_2879.pdf` (PEP del plan anterior 2879 co
 **completos** para los semestres I–VIII, transcritos del grafo de círculos numerados de la malla a
 partir de una captura ampliada (2026-08-17); dudas: Matemáticas discretas I sin flecha de entrada
 legible, y el asterisco de «requisito especial» del Taller de proyectos que la malla no detalla. Énfasis: solo documentados en las notas; no hay selector de ruta todavía.
-Profesores: `losestudiantes.js` trae 79/83 enlaces; falta `sincronizar-profesores.js` (Chrome).
+Profesores: 1327 en 79 materias (1166 con reseña), sincronizados el 2026-08-18 sin Chrome
+(`sincronizar-profesores.js` lee `__NEXT_DATA__` con fetch).

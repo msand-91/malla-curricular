@@ -41,9 +41,9 @@ Biología 30, Mat. y Estadística 7, Química 16, Física 4, C. de la tierra 3, 
 el total disciplinar quedó fuera de las capturas. Diferencias acuerdo ↔ SIA anotadas en
 `INCONSISTENCIAS` (varias optativas del SIA no están en el acuerdo → sin `pre`).
 
-**Profesores.** `sincronizar-profesores.js` necesita Chrome headless (aquí faltan libnss3/libasound2
-y no hay sudo). `verificar-losestudiantes.js` sí corrió: 76/87 códigos existen allí, sin
-discrepancias de nombre.
+**Profesores.** 950 en 76 materias (825 con reseña), sincronizados el 2026-08-18. Ya no hace falta
+Chrome: la página de losestudiantes trae los profesores en `__NEXT_DATA__` y basta `fetch`.
+`verificar-losestudiantes.js`: 76/87 códigos existen allí, sin discrepancias de nombre.
 
 **Fichas completas del SIA** (`herramientas/sia.js enriquecer`): el catálogo `siabog` daba 502; por
 ahora `js/sia.js` viene de `catalogo-sia.js fichas` (créditos y descripción, sin temario).

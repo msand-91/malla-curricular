@@ -92,7 +92,7 @@ css/estilos.css                estilos, tema claro/oscuro, responsive
 js/datos.js                    PLAN_BASE, CATALOGO (67 optativas), INCONSISTENCIAS  [a mano]
 js/app.js                      motor de prerrequisitos, planificador, editor, UI
 js/sia.js                      77 fichas del SIA (75 con descripción)          [generado]
-js/losestudiantes.js           83 materias, 306 profesores, 273 con reseña     [generado]
+losestudiantes.js              83 materias, 1087 profesores, 995 con reseña   [generado]
 js/electivas.js                117 electivas de libre elección (116 vigentes)  [generado]
 js/oferta.js                   oferta del semestre: plan 2519 + libre elección 2CLE, con grupos y horarios  [generado]
 datos/electivas-listado.txt    listado copiado a mano del Departamento de Electivas
@@ -112,15 +112,14 @@ node herramientas/sia.js <código|texto>            # consultar el catálogo del
 node herramientas/catalogo-sia.js sincronizar      # oferta del semestre (grupos, horarios, cupos) → js/oferta.js
 node herramientas/catalogo-sia.js ver <código>     # grupos y horarios de una asignatura
 node herramientas/verificar-losestudiantes.js      # códigos y enlaces
-node herramientas/sincronizar-profesores.js        # profesores (necesita Chrome headless)
+node herramientas/sincronizar-profesores.js        # profesores y reseñas (solo fetch)
 node herramientas/sincronizar-profesores.js --fichas  # solo calificaciones y reseñas (fetch)
 node herramientas/electivas.js importar            # lee datos/electivas-listado.txt y lo valida
 node herramientas/empaquetar.js                    # genera dist/
 node tests/logica.test.js && node tests/ui.test.js # pruebas
 ```
 
-Dependencias solo para desarrollo: `npm install jsdom puppeteer --no-save` y
-`npx puppeteer browsers install chrome`. La app en sí no necesita nada.
+Dependencias solo para desarrollo: `npm install jsdom --no-save`. La app en sí no necesita nada.
 
 ## El planificador
 

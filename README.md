@@ -35,7 +35,7 @@ node herramientas/catalogo-sia.js --carrera=quimica electivas     # electivas.js
 node herramientas/catalogo-sia.js --carrera=quimica fichas        # sia.js (créditos, descripción) desde oferta.js
 node herramientas/sia.js --carrera=quimica enriquecer       # fichas completas cuando «Contenido de asignaturas» responda
 node herramientas/verificar-losestudiantes.js --carrera=quimica --catalogo
-node herramientas/sincronizar-profesores.js --carrera=quimica     # necesita Chrome
+node herramientas/sincronizar-profesores.js --carrera=quimica     # profesores y reseñas
 node herramientas/estado-sia.js                              # ¿qué servicios del SIA responden?
 node herramientas/empaquetar.js --carrera=quimica            # dist/malla-quimica.html
 node tests/correr.js [--carrera=quimica]
@@ -92,7 +92,8 @@ Al abrir cualquier asignatura verás **los profesores que la dictan**, con su ca
 la nota promedio que reportan quienes reseñan, y cuántas reseñas tiene cada uno. Los que tienen
 reseña pública se despliegan para leerla ahí mismo, con sus pros, contras, periodo y dificultad.
 
-Actualmente: **83 materias, 306 profesores, 273 con reseña pública.**
+Actualmente: **Química 83 materias y 1087 profesores** (995 con reseña), **Biología 76 y 950** (825),
+**Sistemas 79 y 1327** (1166). Actualizados el 2026-08-18.
 
 **Solo se muestra la reseña pública de cada profesor**; el resto pide sesión iniciada en el sitio
 (suele ser 1 visible de varias). Y losestudiantes.com no envía cabeceras CORS, así que el navegador
@@ -101,16 +102,16 @@ Por eso los datos se traen **una vez, desde la línea de comandos**, y quedan ca
 `js/losestudiantes.js`.
 
 ```bash
-node herramientas/verificar-losestudiantes.js --catalogo   # códigos y enlaces  (fetch)
-node herramientas/sincronizar-profesores.js                # todo              (necesita Chrome)
-node herramientas/sincronizar-profesores.js --fichas       # solo calificaciones y reseñas (fetch)
+node herramientas/verificar-losestudiantes.js --carrera=<slug> --catalogo   # códigos y enlaces
+node herramientas/sincronizar-profesores.js --carrera=<slug>               # profesores y reseñas
+node herramientas/sincronizar-profesores.js --carrera=<slug> --fichas      # solo calificaciones y reseñas
 ```
 
 El primero resuelve a qué página corresponde cada código SIA. El segundo obtiene los profesores en
-dos fases: la lista de cada materia no viene en el HTML del servidor —se carga con JavaScript— así
-que se renderiza con Chrome headless; luego pide la ficha de cada profesor, que esa sí es HTML del
-servidor, para sacar calificación, nota promedio y la reseña pública. Con `--fichas` se salta la
-primera fase y solo refresca la segunda: no necesita navegador y es mucho más rápido.
+dos fases: la lista de cada materia (la página es Next.js y la trae en `__NEXT_DATA__`, así que
+basta un `fetch`; **ya no hace falta Chrome**, como sí ocurría antes de agosto de 2026), y luego la
+ficha de cada profesor para sacar calificación, nota promedio y la reseña pública. Con `--fichas`
+se salta la primera fase y solo refresca la segunda.
 Todos trabajan de a una página con pausa entre peticiones.
 
 El listado de cada materia muestra hasta unos 9 profesores, que es lo que publica el panel del
@@ -250,8 +251,8 @@ node tests/logica.test.js     # integridad de datos + validación del planificad
 node tests/ui.test.js         # render e interacción con jsdom
 ```
 
-`herramientas/sincronizar-profesores.js` y las capturas de pantalla necesitan además
-`npm install puppeteer && npx puppeteer browsers install chrome`.
+Ninguna herramienta necesita navegador: todas usan `fetch`. Para las pruebas basta
+`npm install jsdom --no-save`.
 
 `logica.test.js` verifica que las referencias entre asignaturas existan, que los créditos por
 componente cuadren con los 158 totales, y que en varios escenarios (desde cero, con semestres
