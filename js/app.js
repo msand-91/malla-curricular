@@ -60,11 +60,12 @@ function construirPlan() {
       /* Si es un cupo con una optativa asignada y el catálogo conoce los
          requisitos de esa optativa, el cupo los hereda. */
       const asig = c.ranura && S.ranuras[c.id];
-      const opt = asig && asig.cod && CATALOGO.find(o => o.cod === asig.cod && (o.pre || o.preEsp || o.preFund));
+      const opt = asig && asig.cod && CATALOGO.find(o => o.cod === asig.cod && (o.pre || o.preEsp || o.preFund || o.preCreditos));
       if (opt) {
         c.pre = [...new Set([...c.pre, ...(opt.pre || []).filter(p => !fuera.has(p))])];
         if (opt.preEsp) c.preEsp = opt.preEsp;
         if (opt.preFund) c.preFund = true;
+        if (opt.preCreditos) c.preCreditos = opt.preCreditos;
       }
       return c;
     });
@@ -111,12 +112,26 @@ function setAprobadas() {
  * Solo Trabajo de Grado lo tiene de forma evaluable.
  */
 function cumplePreEspecial(a, hechas) {
-  // Trabajo de grado, y cualquier asignatura marcada con preFund, exigen toda la
-  // fundamentación (y la disciplinar obligatoria, si la carrera la tiene).
+  /* preCreditos: umbrales del acuerdo del tipo «aprobar 88 créditos del
+     componente disciplinar» o «8 créditos de la agrupación de producción».
+     Cada regla lleva comps (componentes) y/o areas (agrupaciones) y un mínimo;
+     deben cumplirse todas.                                                    */
+  if (a.preCreditos) {
+    const reglas = Array.isArray(a.preCreditos) ? a.preCreditos : [a.preCreditos];
+    return reglas.every(r => {
+      const suma = PLAN.filter(x => x.id !== a.id && hechas.has(x.id)
+          && (!r.comps || r.comps.includes(x.comp))
+          && (!r.areas || r.areas.includes(x.area)))
+        .reduce((n, x) => n + creditos(x), 0);
+      return suma >= r.min;
+    });
+  }
+  // preFund: toda la fundamentación. Trabajo de grado: además lo disciplinar obligatorio.
   if (a.comp !== 'TG' && !a.preFund) return true;
+  const comps = a.preFund ? ['FO', 'FP'] : ['FO', 'FP', 'DO'];
   return PLAN.every(x =>
     x.comp === 'TG' || x.id === a.id ||
-    !['FO', 'FP', 'DO'].includes(x.comp) ||
+    !comps.includes(x.comp) ||
     hechas.has(x.id));
 }
 
@@ -265,6 +280,15 @@ function planificar(maxCr, modo, respetarNivel = true) {
       const grupo = cierreCoreq(a, hechas, enSem, dispIds);
       if (!grupo) continue;
       const crGrupo = grupo.reduce((s, g) => s + creditos(g), 0);
+      /* Un bloque que por sí solo pasa del tope (una práctica de 20 créditos, o
+         las rotaciones clínicas encadenadas por correquisitos) no cabe en
+         ningún semestre: se le da uno propio en vez de dejarlo bloqueado. */
+      if (crGrupo > maxCr) {
+        if (asigs.length) continue;             // primero se cierra el semestre en curso
+        grupo.forEach(g => { enSem.add(g.id); asigs.push(g); });
+        cr += crGrupo;
+        break;
+      }
       if (cr + crGrupo > maxCr) continue;
       grupo.forEach(g => { enSem.add(g.id); asigs.push(g); });
       cr += crGrupo;

@@ -116,7 +116,7 @@ correr('Desde cero / carga alta', [], 24);
 const tres = PLAN.filter(a => a.sem <= 3).map(a => a.id);
 correr('Semestres I-III aprobados', tres, 18);
 // caso patológico: solo aprobó cosas sueltas
-correr('Solo Calculo diferencial aprobado', ['1000004'], 16);
+correr('Solo Quimica basica aprobada', ['1000041'], 16);
 
 /* ---------- 5. edición de la malla ---------- */
 console.log('\n[5] Edición de la malla');
@@ -125,37 +125,64 @@ const sinMods = () => ({ editados: {}, nuevos: [], eliminados: [], orden: null }
 const conMods = m => { api.S.estado = {}; api.S.ranuras = {}; api.S.mods = Object.assign(sinMods(), m); api.construirPlan(); };
 
 const N = api.PLAN_BASE.length;
-conMods({ editados: { '2016696': { sem: 7 } } });
-ok(api.PLAN_POR_ID['2016696'].sem === 7, 'mover una asignatura a otro semestre (Algoritmos VI → VII)');
-ok(api.PLAN_BASE.find(a => a.id === '2016696').sem === 6, 'la malla original queda intacta');
+conMods({ editados: { '2017062': { sem: 5 } } });
+ok(api.PLAN_POR_ID['2017062'].sem === 5, 'mover una asignatura a otro semestre (Genética IV → V)');
+ok(api.PLAN_BASE.find(a => a.id === '2017062').sem === 4, 'la malla original queda intacta');
 
-conMods({ editados: { '2016696': { cr: 4 } } });
-ok(api.metricas().comp.FO.plan === COMPONENTES.FO.creditos + 1, 'editar créditos recalcula el componente (15 → 16)');
+conMods({ editados: { '2017062': { cr: 4 } } });
+ok(api.metricas().comp.FO.plan === COMPONENTES.FO.creditos + 1, 'editar créditos recalcula el componente (35 → 36)');
 
 conMods({ eliminados: ['1000045'] });
 ok(!api.PLAN_POR_ID['1000045'], 'la asignatura eliminada sale del plan');
 ok(!api.PLAN_POR_ID['1000046'].pre.includes('1000045'), 'se limpian las referencias colgantes (Inglés III ya no exige Inglés II)');
 ok(api.PLAN.length === N - 1, `quedan ${N - 1} asignaturas (hay ${api.PLAN.length})`);
 
-conMods({ nuevos: [{ id: 'X1', cod: '9999', nombre: 'Seminario', cr: 2, sem: 6, comp: 'LE', area: null, pre: ['1000004'], co: [] }] });
+conMods({ nuevos: [{ id: 'X1', cod: '9999', nombre: 'Seminario', cr: 2, sem: 6, comp: 'LE', area: null, pre: ['1000041'], co: [] }] });
 ok(api.PLAN.length === N + 1 && api.PLAN_POR_ID['X1'].sem === 6, 'la asignatura nueva entra en el plan');
 
 conMods({ editados: { '1000044': { pre: ['1000047'] } } });
 ok(api.cicloDetectado() === true, 'detecta un ciclo de prerrequisitos (Inglés I ← Inglés IV)');
-conMods({ editados: { '2016703': { co: ['2025975'] }, '2025975': { co: ['2016703'] } } });
+conMods({ editados: { '2017046': { co: ['2017063'] }, '2017063': { co: ['2017046'] } } });
 ok(api.cicloDetectado() === false, 'los correquisitos mutuos NO cuentan como ciclo');
 conMods({});
 
 conMods({ orden: api.PLAN.map(a => a.id).reverse() });
-ok(api.PLAN[0].id === 'ELE_10_3', 'el orden explícito (arrastrar) se respeta');
+ok(api.PLAN[0].id === '2017249', 'el orden explícito (arrastrar) se respeta');
 
 // el planificador debe seguir produciendo planes válidos sobre una malla editada
 conMods({
-  editados: { '2016696': { sem: 7 }, '2015174': { cr: 3 } },
+  editados: { '2017062': { sem: 5 }, '2017061': { cr: 4 } },
   nuevos: [{ id: 'X2', cod: null, nombre: 'Electiva extra', cr: 3, sem: 9, comp: 'LE', area: null, pre: [], co: [] }],
 });
 correr('Plan sobre una malla editada', [], 18);
 conMods({});
+
+/* ---------- 6. requisitos por créditos (propios de este plan) ---------- */
+console.log('\n[6] Requisitos por créditos del acuerdo');
+const soloEstas = ids => { api.S.estado = Object.fromEntries(ids.map(i => [i, 'aprobada'])); api.S.ranuras = {}; api.construirPlan(); };
+const dispDe = id => api.calcularDisponibilidad()[id];
+// Salud de hato: Epidemiología + 8 créditos de la agrupación Producción
+const prodIds = api.PLAN.filter(a => a.area === 'produccion').map(a => a.id);
+soloEstas(['2017058']);
+ok(dispDe('2017068') === 'bloqueada', 'Salud de hato bloqueada sin los 8 créditos de Producción');
+soloEstas(['2017058', ...prodIds]);
+ok(dispDe('2017068') === 'disponible', `y disponible con los ${prodIds.length} cupos de Producción aprobados`);
+// Trabajo de grado: 88 créditos del componente disciplinar
+soloEstas(api.PLAN.filter(a => ['DO', 'DP'].includes(a.comp)).slice(0, 3).map(a => a.id));
+ok(dispDe('2017249') === 'bloqueada', 'Trabajo de grado bloqueado con pocos créditos disciplinares');
+soloEstas(api.PLAN.filter(a => ['DO', 'DP'].includes(a.comp)).map(a => a.id));
+ok(dispDe('2017249') === 'disponible', 'y disponible con los 120 créditos disciplinares');
+// Sociedades rurales: 100 % de la fundamentación
+soloEstas(api.PLAN.filter(a => a.comp === 'FO').map(a => a.id));
+ok(dispDe('2017091') === 'bloqueada', 'Sociedades rurales aún bloqueada sin la biología optativa');
+soloEstas(api.PLAN.filter(a => ['FO', 'FP'].includes(a.comp)).map(a => a.id));
+ok(dispDe('2017091') === 'disponible', 'y disponible con toda la fundamentación (38 créditos)');
+// Práctica integrada: 38 de fundamentación + 120 del disciplinar
+soloEstas(api.PLAN.filter(a => ['FO', 'FP'].includes(a.comp)).map(a => a.id));
+ok(dispDe('PRACT') === 'bloqueada', 'Práctica integrada bloqueada solo con la fundamentación');
+soloEstas(api.PLAN.filter(a => ['FO', 'FP', 'DO', 'DP'].includes(a.comp)).map(a => a.id));
+ok(dispDe('PRACT') === 'disponible', 'y disponible con fundamentación y disciplinar completos');
+api.S.estado = {}; api.construirPlan();
 
 console.log('\n' + (errs.length ? `✗ ${errs.length} FALLA(S)` : '✓ TODO PASA'));
 process.exit(errs.length ? 1 : 0);

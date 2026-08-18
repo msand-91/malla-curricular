@@ -33,25 +33,19 @@
   .carrera .ir { position: relative; margin-top: auto; padding-top: 10px; font-size: 13px; font-weight: 650; color: var(--c); }
   .portada .nota { margin-top: 28px; font-size: 12.5px; color: var(--texto-2); max-width: 640px; }
   .portada .nota a { color: var(--texto-2); }
-  .cabecera-marca { display: flex; align-items: center; gap: 18px; margin-bottom: 4px; }
-  .cabecera-marca .quimisand { width: 84px; height: 84px; border-radius: 22px; background: #fbfaf6; padding: 6px; box-shadow: var(--sombra); flex: none; object-fit: contain; }
   .contacto { margin-top: 26px; display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 12px 16px; font-size: 13.5px; box-shadow: var(--sombra); max-width: 640px; }
   .contacto img { border-radius: 12px; background: #fbfaf6; padding: 3px; flex: none; }
+  .contacto > div { line-height: 1.55; }
   .contacto b { display: block; margin-bottom: 2px; }
   .contacto a { color: var(--acento, #2563c4); font-weight: 600; text-decoration: none; }
   .contacto a:hover { text-decoration: underline; }
-  @media (max-width: 560px) { .cabecera-marca { align-items: flex-start; } .cabecera-marca .quimisand { width: 60px; height: 60px; } }
+  @media (max-width: 560px) { .contacto { align-items: flex-start; } }
 </style>
 </head>
 <body>
 <main class="portada">
-  <div class="cabecera-marca">
-    <img class="quimisand" src="img/quimisand.png" alt="Quimisand" width="84" height="84">
-    <div>
-      <div class="marca"><i></i> Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
-      <h1>Mallas curriculares <span>interactivas</span></h1>
-    </div>
-  </div>
+  <div class="marca"><i></i> Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
+  <h1>Mallas curriculares <span>interactivas</span></h1>
   <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
   <div class="carreras">
     <a class="carrera" href="biologia/" style="--c:#2f9e5b;--c2:#7fd39c;--fondo:url(&quot;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%232f9e5b%22%20stroke-opacity%3D%220.16%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M10%20110C10%2070%2040%2040%2090%2030c-8%2045-35%2072-80%2080z%22%2F%3E%3Cpath%20d%3D%22M10%20110c15-25%2032-42%2055-58%22%2F%3E%3Cpath%20d%3D%22M75%2015c20-3%2035%205%2042%2020%22%2F%3E%3Cpath%20d%3D%22M85%2012c4%208%206%2014%206%2022%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E&quot;)">
@@ -72,13 +66,19 @@
       <small>plan 2A74 (2023) · 165 créditos (+20 de nivelación)</small>
       <span class="ir">Abrir <span aria-hidden="true">→</span></span>
     </a>
+    <a class="carrera" href="veterinaria/" style="--c:#c2410c;--c2:#f4a261;--fondo:url(&quot;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22110%22%20height%3D%22110%22%20viewBox%3D%220%200%20110%20110%22%3E%3Cg%20fill%3D%22%23c2410c%22%20fill-opacity%3D%220.16%22%3E%3Cellipse%20cx%3D%2230%22%20cy%3D%2240%22%20rx%3D%227%22%20ry%3D%229%22%2F%3E%3Cellipse%20cx%3D%2218%22%20cy%3D%2226%22%20rx%3D%224%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2229%22%20cy%3D%2221%22%20rx%3D%224%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2240%22%20cy%3D%2227%22%20rx%3D%224%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2290%22%20rx%3D%227%22%20ry%3D%229%22%2F%3E%3Cellipse%20cx%3D%2268%22%20cy%3D%2276%22%20rx%3D%224%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2279%22%20cy%3D%2271%22%20rx%3D%224%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2290%22%20cy%3D%2277%22%20rx%3D%224%22%20ry%3D%225%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E&quot;)">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v5a4 4 0 0 0 8 0V3"/><path d="M10 15v1.5a4.5 4.5 0 0 0 9 0V14"/><circle cx="19.5" cy="12" r="2"/><path d="M6 3H4.5M14 3h1.5"/></svg></span>
+      <b>Medicina Veterinaria</b>
+      <small>209 créditos · 12 semestres</small>
+      <span class="ir">Abrir <span aria-hidden="true">→</span></span>
+    </a>
   </div>
   <p class="nota">El avance se guarda en tu navegador, por carrera. Datos públicos del SIA, sin sesión ni credenciales; confirma siempre en el SIA antes de inscribir.</p>
   <section class="contacto">
     <img src="img/quimisand.png" alt="" width="44" height="44">
     <div>
       <b>¿Sugerencias, errores o necesitas ayuda?</b>
-      <div>Matías Sandoval · <a href="https://wa.me/573223513477" target="_blank" rel="noopener">322 351 3477</a> · <a href="mailto:msandovalsu@unal.edu.co">msandovalsu@unal.edu.co</a></div>
+      <div>Matías Sandoval · <a href="https://wa.me/573223513477" target="_blank" rel="noopener">322 351 3477</a> · <a href="mailto:msandovalsu@unal.edu.co">msandovalsu@unal.edu.co</a> · <a href="https://instagram.com/matiassandoval715" target="_blank" rel="noopener">@matiassandoval715</a></div>
     </div>
   </section>
 </main>

@@ -79,7 +79,24 @@ function correr(etiqueta, aprobadas, maxCr, modo = 'critico', nivel = true) {
       for (const p of a.pre || []) if (!hechas.has(p)) { console.log(`   ✗ VIOLA pre: ${a.nombre} sin ${api.PLAN_POR_ID[p].nombre}`); viol++; }
       for (const c of a.co || []) if (!hechas.has(c) && !enSem.has(c)) { console.log(`   ✗ VIOLA co: ${a.nombre} sin ${api.PLAN_POR_ID[c].nombre}`); viol++; }
     }
-    if (s.cr > maxCr) { console.log(`   ✗ excede tope: ${s.cr} > ${maxCr}`); viol++; }
+    /* Un semestre puede pasarse del tope solo si es un único bloque indivisible:
+       una asignatura sola (p. ej. una práctica de 20 créditos) o un grupo
+       encadenado por correquisitos (las rotaciones clínicas). */
+    if (s.cr > maxCr) {
+      const ids = new Set(s.asigs.map(a => a.id));
+      const conexo = (() => {
+        const vistos = new Set([s.asigs[0].id]), pila = [s.asigs[0]];
+        while (pila.length) {
+          const a = pila.pop();
+          for (const v of [...(a.co || []), ...s.asigs.filter(x => (x.co || []).includes(a.id)).map(x => x.id)]) {
+            if (ids.has(v) && !vistos.has(v)) { vistos.add(v); pila.push(api.PLAN_POR_ID[v]); }
+          }
+        }
+        return vistos.size === ids.size;
+      })();
+      if (conexo) console.log(`   · bloque indivisible de ${s.cr} cr (tope ${maxCr}): ${s.asigs.map(a => a.nombre).join(' + ')}`);
+      else { console.log(`   ✗ excede tope: ${s.cr} > ${maxCr}`); viol++; }
+    }
     s.asigs.forEach(a => hechas.add(a.id));
   }
   const cubiertas = hechas.size === api.PLAN.length;

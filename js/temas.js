@@ -24,6 +24,13 @@ const TEMAS = {
     // Circuito: nodos y trazas ortogonales.
     patron: '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><g fill="none" stroke="ACENTO" stroke-width="1" stroke-linecap="round"><path d="M10 20h40v30h40M50 20v-15M90 50v40h-30v40M90 90h35M10 110h25v-30"/><circle cx="10" cy="20" r="2.5"/><circle cx="90" cy="50" r="2.5"/><circle cx="60" cy="90" r="2.5"/><circle cx="125" cy="90" r="2.5"/><circle cx="35" cy="80" r="2.5"/><circle cx="10" cy="110" r="2.5"/></g></svg>',
   },
+  veterinaria: {
+    acento: '#c2410c', acento2: '#f4a261',
+    // Estetoscopio + huella: cuidado animal, en una sola línea.
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v5a4 4 0 0 0 8 0V3"/><path d="M10 15v1.5a4.5 4.5 0 0 0 9 0V14"/><circle cx="19.5" cy="12" r="2"/><path d="M6 3H4.5M14 3h1.5"/></svg>',
+    // Huellas: patrón orgánico y disperso.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110"><g fill="ACENTO"><ellipse cx="30" cy="40" rx="7" ry="9"/><ellipse cx="18" cy="26" rx="4" ry="5"/><ellipse cx="29" cy="21" rx="4" ry="5"/><ellipse cx="40" cy="27" rx="4" ry="5"/><ellipse cx="80" cy="90" rx="7" ry="9"/><ellipse cx="68" cy="76" rx="4" ry="5"/><ellipse cx="79" cy="71" rx="4" ry="5"/><ellipse cx="90" cy="77" rx="4" ry="5"/></g></svg>',
+  },
   generico: {
     acento: '#2563c4', acento2: '#7aa6f0',
     icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-4 9 4-9 4-9-4z"/><path d="M7 11v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5"/></svg>',
