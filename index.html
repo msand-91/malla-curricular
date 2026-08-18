@@ -6,28 +6,61 @@
 <title>Mallas curriculares · UNAL Bogotá</title>
 <link rel="stylesheet" href="css/estilos.css">
 <style>
-  .portada { max-width: 760px; margin: 40px auto; padding: 0 16px; }
-  .portada h1 { font-size: 26px; margin: 0 0 6px; }
-  .portada p.sub { color: var(--texto-2); margin: 0 0 22px; }
-  .carreras { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-  .carreras a { display: block; background: var(--panel); border: 1px solid var(--borde); border-radius: var(--r); padding: 18px 16px; text-decoration: none; color: var(--texto); box-shadow: var(--sombra); transition: transform .12s, border-color .12s; }
-  .carreras a:hover { transform: translateY(-2px); border-color: var(--disp); }
-  .carreras .logo { font-size: 30px; margin-bottom: 8px; }
-  .carreras b { display: block; font-size: 15px; margin-bottom: 4px; }
-  .carreras small { color: var(--texto-2); font-size: 12.5px; }
-  .portada .nota { margin-top: 26px; font-size: 12.5px; color: var(--texto-2); }
+  body { min-height: 100vh; background:
+      radial-gradient(900px 500px at 8% -10%, color-mix(in srgb, #0f9aa8 22%, transparent), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, color-mix(in srgb, #5b6cf5 22%, transparent), transparent 60%),
+      radial-gradient(700px 500px at 50% 110%, color-mix(in srgb, #2f9e5b 18%, transparent), transparent 60%),
+      var(--bg); }
+  .portada { max-width: 980px; margin: 0 auto; padding: 56px 20px 40px; }
+  .portada .marca { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--texto-2); margin-bottom: 14px; }
+  .portada .marca i { width: 26px; height: 2px; background: linear-gradient(90deg, #0f9aa8, #2f9e5b, #5b6cf5); display: inline-block; border-radius: 2px; }
+  .portada h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 12px; }
+  .portada h1 span { background: linear-gradient(90deg, #0f9aa8, #2f9e5b 50%, #5b6cf5); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .portada p.sub { color: var(--texto-2); margin: 0 0 30px; max-width: 640px; font-size: 15.5px; }
+  .carreras { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .carrera { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; min-height: 190px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 16px; padding: 22px 20px 18px; text-decoration: none; color: var(--texto);
+    box-shadow: var(--sombra); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+  .carrera::before { content: ""; position: absolute; inset: 0; background-image: var(--fondo); background-size: auto; opacity: .9; pointer-events: none;
+    mask-image: linear-gradient(160deg, rgba(0,0,0,.9), transparent 70%); -webkit-mask-image: linear-gradient(160deg, rgba(0,0,0,.9), transparent 70%); }
+  .carrera::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--c), var(--c2)); }
+  .carrera:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 10px 28px color-mix(in srgb, var(--c) 28%, transparent); }
+  .carrera .ico { position: relative; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; color: #fff; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--c), var(--c2)); box-shadow: 0 6px 16px color-mix(in srgb, var(--c) 40%, transparent); }
+  .carrera .ico svg { width: 26px; height: 26px; }
+  .carrera b { position: relative; font-size: 17px; letter-spacing: -.01em; }
+  .carrera small { position: relative; color: var(--texto-2); font-size: 12.5px; line-height: 1.4; }
+  .carrera .ir { position: relative; margin-top: auto; padding-top: 10px; font-size: 13px; font-weight: 650; color: var(--c); }
+  .portada .nota { margin-top: 28px; font-size: 12.5px; color: var(--texto-2); max-width: 640px; }
+  .portada .nota a { color: var(--texto-2); }
 </style>
 </head>
 <body>
 <main class="portada">
-  <h1>Mallas curriculares interactivas</h1>
-  <p class="sub">Universidad Nacional de Colombia · Sede Bogotá. Elige tu carrera: marca lo aprobado, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
+  <div class="marca"><i></i> Universidad Nacional de Colombia · Sede Bogotá</div>
+  <h1>Mallas curriculares <span>interactivas</span></h1>
+  <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
   <div class="carreras">
-    <a href="biologia/"><div class="logo">🌿</div><b>Biología</b><small>163 créditos (+12 de inglés) · plan 2513</small></a>
-    <a href="quimica/"><div class="logo">⚗</div><b>Química</b><small>158 créditos · plan 2519</small></a>
-    <a href="sistemas/"><div class="logo">💻</div><b>Ingeniería de Sistemas y Computación</b><small>plan 2A74 (2023) · 165 créditos (+20 de nivelación) · plan 2A74</small></a>
+    <a class="carrera" href="biologia/" style="--c:#2f9e5b;--c2:#7fd39c;--fondo:url(&quot;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%232f9e5b%22%20stroke-opacity%3D%220.16%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M10%20110C10%2070%2040%2040%2090%2030c-8%2045-35%2072-80%2080z%22%2F%3E%3Cpath%20d%3D%22M10%20110c15-25%2032-42%2055-58%22%2F%3E%3Cpath%20d%3D%22M75%2015c20-3%2035%205%2042%2020%22%2F%3E%3Cpath%20d%3D%22M85%2012c4%208%206%2014%206%2022%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E&quot;)">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5C4.5 11 10 5.5 20 4c-1 10-6.5 15.5-15.5 15.5z"/><path d="M4.5 19.5C8 14.5 11.5 11 16 8"/></svg></span>
+      <b>Biología</b>
+      <small>163 créditos (+12 de inglés)</small>
+      <span class="ir">Abrir <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="carrera" href="quimica/" style="--c:#0f9aa8;--c2:#5cc8d2;--fondo:url(&quot;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2297%22%20viewBox%3D%220%200%2056%2097%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%230f9aa8%22%20stroke-opacity%3D%220.16%22%20stroke-width%3D%221%22%3E%3Cpath%20d%3D%22M28%202%2054%2017v30L28%2062%202%2047V17z%22%2F%3E%3Cpath%20d%3D%22M28%2050%2054%2065v30L28%20110%202%2095V65z%22%2F%3E%3Cpath%20d%3D%22M0%20-14%2026%201v30L0%2046%20-26%2031V1z%22%2F%3E%3Cpath%20d%3D%22M56%20-14%2082%201v30L56%2046%2030%2031V1z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E&quot;)">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3h5M10.5 3v5.2L5.6 16.6A2.6 2.6 0 0 0 7.9 20.5h8.2a2.6 2.6 0 0 0 2.3-3.9L13.5 8.2V3"/><path d="M8 14.5h8"/></svg></span>
+      <b>Química</b>
+      <small>158 créditos</small>
+      <span class="ir">Abrir <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="carrera" href="sistemas/" style="--c:#5b6cf5;--c2:#9aa5ff;--fondo:url(&quot;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22140%22%20height%3D%22140%22%20viewBox%3D%220%200%20140%20140%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%235b6cf5%22%20stroke-opacity%3D%220.16%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M10%2020h40v30h40M50%2020v-15M90%2050v40h-30v40M90%2090h35M10%20110h25v-30%22%2F%3E%3Ccircle%20cx%3D%2210%22%20cy%3D%2220%22%20r%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2290%22%20cy%3D%2250%22%20r%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2290%22%20r%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%22125%22%20cy%3D%2290%22%20r%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2235%22%20cy%3D%2280%22%20r%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2210%22%20cy%3D%22110%22%20r%3D%222.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E&quot;)">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6.5" r="2.2"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M8.2 6.5h7.6M7 8.6l4 7.2M17 8.6l-4 7.2"/></svg></span>
+      <b>Ingeniería de Sistemas y Computación</b>
+      <small>plan 2A74 (2023) · 165 créditos (+20 de nivelación)</small>
+      <span class="ir">Abrir <span aria-hidden="true">→</span></span>
+    </a>
   </div>
-  <p class="nota">El avance se guarda en tu navegador, por carrera. Datos del SIA (acceso público, sin sesión); confirma siempre en el SIA antes de inscribir.</p>
+  <p class="nota">El avance se guarda en tu navegador, por carrera. Datos públicos del SIA, sin sesión ni credenciales; confirma siempre en el SIA antes de inscribir.</p>
 </main>
 </body>
 </html>

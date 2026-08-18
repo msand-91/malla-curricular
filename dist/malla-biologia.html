@@ -583,10 +583,25 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
 .card.homologada { border-left-style: dashed; }
 .card.homologada .etq { background: transparent; color: var(--ok); border: 1px dashed var(--ok); }
 
+/* ------------------------------------------- identidad por carrera --------- */
+:root { --acento: #2563c4; --acento-2: #7aa6f0; }
+header.top { background: linear-gradient(100deg, color-mix(in srgb, var(--acento) 55%, #2a2a48), color-mix(in srgb, var(--acento-2) 35%, #3d3d68)); border-bottom: 3px solid var(--acento-2); }
+.logo { background: rgba(255,255,255,.14); color: #fff; border: 1.5px solid rgba(255,255,255,.35); backdrop-filter: blur(4px); }
+.logo svg { width: 22px; height: 22px; display: block; }
+nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
+.btn.primario { background: var(--acento); border-color: var(--acento); }
+.btn.primario:hover { background: color-mix(in srgb, var(--acento) 85%, #000); }
+.barra-progreso-global > div { background: linear-gradient(90deg, var(--acento), var(--acento-2)); }
+.hor-escenarios .esc.activo { border-color: var(--acento); }
+.ruta-panel { margin: -6px 0 14px; border-left: 4px solid var(--acento); }
+.ruta-panel .meta { font-size: 12.5px; color: var(--texto-2); margin: 0 0 8px; }
+.ruta-panel .req-lista .r.no { opacity: .6; }
+#lblRuta select { max-width: 260px; }
+
 </style>
 
 <header class="top">
-  <div class="logo" data-texto="logo">🎓</div>
+  <div class="logo" aria-hidden="true"></div>
   <div>
     <h1 data-texto="titulo">Malla curricular</h1>
     <p class="sub" data-texto="subtitulo">Universidad Nacional de Colombia · Sede Bogotá</p>
@@ -615,9 +630,12 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
       <input type="search" id="busca" placeholder="Buscar asignatura o código…">
       <label><input type="checkbox" id="chkDisp"> Solo lo que puedo inscribir</label>
       <button class="btn" id="btnNivelacion" title="Marca las asignaturas de nivelación (inglés, matemáticas básicas…) como exentas u homologadas" hidden>Nivelación: exento</button>
+      <label id="lblRuta"><span style="white-space:nowrap">Énfasis</span>
+        <select id="selRuta"><option value="">— ninguno —</option></select></label>
       <button class="btn" id="btnEdicion">✎ Editar malla</button>
       <button class="btn" id="btnLimpiarResalte" hidden>Quitar resalte</button>
     </div>
+    <div id="rutaCont" hidden></div>
     <details class="acordeon" id="ayudaMalla">
       <summary>¿Cómo funciona?</summary>
       <div>
@@ -782,7 +800,7 @@ const CARRERA = {
   nombre: 'Biología',
   titulo: 'Malla Curricular · Pregrado en Biología',
   subtitulo: 'Universidad Nacional de Colombia · Sede Bogotá · 163 créditos (+12 de inglés)',
-  logo: '🌿',
+  tema: 'biologia',        // color, icono y fondo (js/temas.js)
   slug: 'biologia',
   plan: '2513',                                  // código del plan de estudios en el SIA
   sede: /1101 SEDE BOGOT/,                       // textos de las listas del Catálogo del SIA
@@ -36874,6 +36892,65 @@ const INCONSISTENCIAS = [
 ];
 
 
+/* ===== ../js/temas.js ===== */
+/* ============================================================================
+   temas.js — identidad visual por carrera: color de acento, icono minimalista
+   (SVG de línea) y patrón de fondo. Cada carrera indica su tema en carrera.js
+   con `tema: 'quimica'` (o define uno propio con la misma forma).
+   Los patrones son SVG en línea, en el color de acento y muy tenues; se ponen
+   como fondo fijo del <body> para que la página respire un poco de la carrera.
+   ========================================================================== */
+const TEMAS = {
+  quimica: {
+    acento: '#0f9aa8', acento2: '#5cc8d2',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3h5M10.5 3v5.2L5.6 16.6A2.6 2.6 0 0 0 7.9 20.5h8.2a2.6 2.6 0 0 0 2.3-3.9L13.5 8.2V3"/><path d="M8 14.5h8"/></svg>',
+    // Hexágonos: anillos de benceno, muy tenues.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97" viewBox="0 0 56 97"><g fill="none" stroke="ACENTO" stroke-width="1"><path d="M28 2 54 17v30L28 62 2 47V17z"/><path d="M28 50 54 65v30L28 110 2 95V65z"/><path d="M0 -14 26 1v30L0 46 -26 31V1z"/><path d="M56 -14 82 1v30L56 46 30 31V1z"/></g></svg>',
+  },
+  biologia: {
+    acento: '#2f9e5b', acento2: '#7fd39c',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5C4.5 11 10 5.5 20 4c-1 10-6.5 15.5-15.5 15.5z"/><path d="M4.5 19.5C8 14.5 11.5 11 16 8"/></svg>',
+    // Nervaduras / hojas estilizadas.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><g fill="none" stroke="ACENTO" stroke-width="1" stroke-linecap="round"><path d="M10 110C10 70 40 40 90 30c-8 45-35 72-80 80z"/><path d="M10 110c15-25 32-42 55-58"/><path d="M75 15c20-3 35 5 42 20"/><path d="M85 12c4 8 6 14 6 22"/></g></svg>',
+  },
+  sistemas: {
+    acento: '#5b6cf5', acento2: '#9aa5ff',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6.5" r="2.2"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M8.2 6.5h7.6M7 8.6l4 7.2M17 8.6l-4 7.2"/></svg>',
+    // Circuito: nodos y trazas ortogonales.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><g fill="none" stroke="ACENTO" stroke-width="1" stroke-linecap="round"><path d="M10 20h40v30h40M50 20v-15M90 50v40h-30v40M90 90h35M10 110h25v-30"/><circle cx="10" cy="20" r="2.5"/><circle cx="90" cy="50" r="2.5"/><circle cx="60" cy="90" r="2.5"/><circle cx="125" cy="90" r="2.5"/><circle cx="35" cy="80" r="2.5"/><circle cx="10" cy="110" r="2.5"/></g></svg>',
+  },
+  generico: {
+    acento: '#2563c4', acento2: '#7aa6f0',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-4 9 4-9 4-9-4z"/><path d="M7 11v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5"/></svg>',
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="1.2" fill="ACENTO"/></svg>',
+  },
+};
+
+/** Tema resuelto para una carrera (por nombre de tema o por objeto propio). */
+function temaDe(carrera) {
+  const t = carrera && carrera.tema;
+  return (typeof t === 'object' && t) || TEMAS[t] || TEMAS[carrera && carrera.slug] || TEMAS.generico;
+}
+
+/** Fondo del <body>: el patrón del tema, en su color y con la opacidad dada. */
+function fondoTema(tema, opacidad = 0.07) {
+  const svg = tema.patron.replace(/ACENTO/g, tema.acento).replace(/stroke="([^"]+)"/g, 'stroke="$1" stroke-opacity="' + opacidad + '"').replace(/fill="(#[^"]+)"/g, 'fill="$1" fill-opacity="' + opacidad + '"');
+  return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+}
+
+/** Aplica la identidad de la carrera al documento: variables CSS, icono y fondo. */
+function aplicarTemaCarrera(carrera) {
+  const t = temaDe(carrera);
+  const r = document.documentElement;
+  r.style.setProperty('--acento', t.acento);
+  r.style.setProperty('--acento-2', t.acento2);
+  document.body.style.backgroundImage = fondoTema(t);
+  document.body.style.backgroundAttachment = 'fixed';
+  document.querySelectorAll('.logo').forEach(el => { el.innerHTML = t.icono; });
+  return t;
+}
+
+
 /* ===== ../js/app.js ===== */
 /* ==========================================================================
    app.js — motor de prerrequisitos, planificador y UI
@@ -38531,6 +38608,37 @@ function sugerirHorario() {
   caja.hidden = false;
 }
 
+/* ------------------------------------------------------------ énfasis ---- */
+const LISTA_RUTAS = typeof RUTAS === 'object' && Array.isArray(RUTAS) ? RUTAS : [];
+
+/** Panel del énfasis elegido: sus asignaturas, si están en la oferta y en qué cupo van. */
+function pintarRuta() {
+  const cont = $('#rutaCont'); const sel = $('#selRuta');
+  if (!cont || !sel) return;
+  if (!LISTA_RUTAS.length) { cont.hidden = true; sel.closest('label').hidden = true; return; }
+  if (sel.options.length <= 1) LISTA_RUTAS.forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.nombre; sel.appendChild(o); });
+  sel.value = S.config.ruta || '';
+  const r = LISTA_RUTAS.find(x => x.id === sel.value);
+  if (!r) { cont.hidden = true; return; }
+  cont.hidden = false;
+  const asignadas = new Map(); for (const [slot, v] of Object.entries(S.ranuras)) if (v.cod) asignadas.set(codBase(v.cod), slot);
+  const filas = r.asignaturas.map(a => {
+    const o = ofertaDe(a.cod); const enPlan = PLAN.some(x => codBase(codDe(x)) === codBase(a.cod) && !x.ranura);
+    const estado = enPlan ? 'ya está en tu malla' : asignadas.has(codBase(a.cod)) ? 'asignada a un cupo' : o ? (o.actividades.some(x => x.grupos.length) ? 'en la oferta de este semestre' : 'en el SIA, sin grupos este semestre') : 'no aparece en la oferta actual';
+    const clase = enPlan || asignadas.has(codBase(a.cod)) ? 'si' : o ? '' : 'no';
+    return `<div class="r ${clase}"><span class="ic">${clase === 'si' ? '✔' : clase === 'no' ? '·' : '○'}</span><span>${esc(o ? o.nombre : a.nombre)} <small>(${esc(a.cod)}${o ? ' · ' + o.creditos + ' cr' : ''}${a.porConfirmar ? ' · nombre por confirmar' : ''}) — ${estado}</small></span></div>`;
+  }).join('');
+  const libres = PLAN.filter(a => a.comp === 'LE' && a.ranura && !S.ranuras[a.id]).length;
+  cont.innerHTML = `<div class="panel ruta-panel"><h3>Énfasis: ${esc(r.nombre)} <span class="hint">— ruta sugerida por el PEP, no obligatoria</span></h3>
+    <p class="meta">${esc(r.descripcion || '')}</p>
+    <div class="req-lista">${filas}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button class="btn primario" data-ruta-asignar ${libres ? '' : 'disabled'}>Llenar mis ${libres} cupo${libres === 1 ? '' : 's'} de libre elección con este énfasis</button>
+      <button class="btn" data-ruta-quitar>Quitar el énfasis</button>
+      <span class="meta">Se asignan en orden a los cupos libres las que aún no tengas; puedes cambiar cualquiera después desde su cupo.</span>
+    </div></div>`;
+}
+
 /* ------------------------------------------------------------------- notas */
 function pintarNotas() {
   $('#notasCont').innerHTML = INCONSISTENCIAS.map(n =>
@@ -38550,6 +38658,7 @@ function irA(id) {
 function refrescar() {
   construirPlan();   // los cupos heredan requisitos de la optativa asignada
   pintarMalla();
+  pintarRuta();
   pintarResumen();
   if (!$('#vPlan').hidden) pintarPlan();
   if (!$('#vCatalogo').hidden) pintarCatalogo();
@@ -38568,11 +38677,12 @@ function init() {
   construirPlan();
   // Textos de la carrera (título, subtítulo, fuentes…) desde carreras/<slug>/carrera.js.
   const T = Object.assign({}, CARRERA_APP.textos || {});
-  ['titulo', 'subtitulo', 'logo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
+  ['titulo', 'subtitulo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
   $$('[data-texto]').forEach(el => { const v = T[el.dataset.texto]; if (v != null) el.textContent = v; });
   $$('[data-texto-html]').forEach(el => { const v = T[el.dataset.textoHtml]; if (v != null) el.innerHTML = v; });
   $$('[data-texto-placeholder]').forEach(el => { const v = T[el.dataset.textoPlaceholder]; if (v != null) el.placeholder = v; });
   if (CARRERA_APP.titulo) document.title = CARRERA_APP.titulo + ' · UNAL Bogotá';
+  if (typeof aplicarTemaCarrera === 'function') aplicarTemaCarrera(CARRERA_APP);   // color, icono y fondo de la carrera
   // El atajo de nivelación solo tiene sentido si la carrera tiene componentes que no cuentan.
   const bNiv0 = $('#btnNivelacion');
   if (bNiv0) bNiv0.hidden = !Object.values(COMPONENTES).some(c => c.noCuenta);
@@ -38751,6 +38861,27 @@ function init() {
   $('#buscaHor').addEventListener('input', sugerirHorario);
   $('#buscaHor').addEventListener('focus', sugerirHorario);
   $('#btnLimpiarResalte').addEventListener('click', () => { resaltado = null; refrescar(); });
+  // Énfasis / rutas sugeridas (si la carrera las define).
+  const selRuta = $('#selRuta');
+  if (selRuta) selRuta.addEventListener('change', () => { S.config.ruta = selRuta.value || null; guardar(); pintarRuta(); });
+  document.addEventListener('click', e => {
+    if (e.target.closest('[data-ruta-quitar]')) { S.config.ruta = null; guardar(); pintarRuta(); return; }
+    if (e.target.closest('[data-ruta-asignar]')) {
+      const r = LISTA_RUTAS.find(x => x.id === S.config.ruta); if (!r) return;
+      const ya = new Set([...Object.values(S.ranuras).map(v => codBase(v.cod)), ...PLAN.filter(a => !a.ranura).map(a => codBase(codDe(a)))]);
+      const libres = PLAN.filter(a => a.comp === 'LE' && a.ranura && !S.ranuras[a.id]);
+      let n = 0;
+      for (const a of r.asignaturas) {
+        if (ya.has(codBase(a.cod)) || !libres.length) continue;
+        const cupo = libres.shift(); const o = ofertaDe(a.cod);
+        S.ranuras[cupo.id] = { cod: a.cod, nombre: o ? o.nombre : a.nombre };
+        if (o && o.creditos) S.ranuras[cupo.id].cr = o.creditos;
+        ya.add(codBase(a.cod)); n++;
+      }
+      guardar(); refrescar();
+      avisar(n ? `${n} asignatura(s) del énfasis asignadas a tus cupos de libre elección.` : 'No había nada nuevo que asignar.');
+    }
+  });
   // Nivelación (inglés, matemáticas básicas, lecto-escritura): no todo el mundo la cursa.
   const bNiv = $('#btnNivelacion');
   if (bNiv) bNiv.addEventListener('click', () => {

@@ -1654,6 +1654,37 @@ function sugerirHorario() {
   caja.hidden = false;
 }
 
+/* ------------------------------------------------------------ énfasis ---- */
+const LISTA_RUTAS = typeof RUTAS === 'object' && Array.isArray(RUTAS) ? RUTAS : [];
+
+/** Panel del énfasis elegido: sus asignaturas, si están en la oferta y en qué cupo van. */
+function pintarRuta() {
+  const cont = $('#rutaCont'); const sel = $('#selRuta');
+  if (!cont || !sel) return;
+  if (!LISTA_RUTAS.length) { cont.hidden = true; sel.closest('label').hidden = true; return; }
+  if (sel.options.length <= 1) LISTA_RUTAS.forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.nombre; sel.appendChild(o); });
+  sel.value = S.config.ruta || '';
+  const r = LISTA_RUTAS.find(x => x.id === sel.value);
+  if (!r) { cont.hidden = true; return; }
+  cont.hidden = false;
+  const asignadas = new Map(); for (const [slot, v] of Object.entries(S.ranuras)) if (v.cod) asignadas.set(codBase(v.cod), slot);
+  const filas = r.asignaturas.map(a => {
+    const o = ofertaDe(a.cod); const enPlan = PLAN.some(x => codBase(codDe(x)) === codBase(a.cod) && !x.ranura);
+    const estado = enPlan ? 'ya está en tu malla' : asignadas.has(codBase(a.cod)) ? 'asignada a un cupo' : o ? (o.actividades.some(x => x.grupos.length) ? 'en la oferta de este semestre' : 'en el SIA, sin grupos este semestre') : 'no aparece en la oferta actual';
+    const clase = enPlan || asignadas.has(codBase(a.cod)) ? 'si' : o ? '' : 'no';
+    return `<div class="r ${clase}"><span class="ic">${clase === 'si' ? '✔' : clase === 'no' ? '·' : '○'}</span><span>${esc(o ? o.nombre : a.nombre)} <small>(${esc(a.cod)}${o ? ' · ' + o.creditos + ' cr' : ''}${a.porConfirmar ? ' · nombre por confirmar' : ''}) — ${estado}</small></span></div>`;
+  }).join('');
+  const libres = PLAN.filter(a => a.comp === 'LE' && a.ranura && !S.ranuras[a.id]).length;
+  cont.innerHTML = `<div class="panel ruta-panel"><h3>Énfasis: ${esc(r.nombre)} <span class="hint">— ruta sugerida por el PEP, no obligatoria</span></h3>
+    <p class="meta">${esc(r.descripcion || '')}</p>
+    <div class="req-lista">${filas}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button class="btn primario" data-ruta-asignar ${libres ? '' : 'disabled'}>Llenar mis ${libres} cupo${libres === 1 ? '' : 's'} de libre elección con este énfasis</button>
+      <button class="btn" data-ruta-quitar>Quitar el énfasis</button>
+      <span class="meta">Se asignan en orden a los cupos libres las que aún no tengas; puedes cambiar cualquiera después desde su cupo.</span>
+    </div></div>`;
+}
+
 /* ------------------------------------------------------------------- notas */
 function pintarNotas() {
   $('#notasCont').innerHTML = INCONSISTENCIAS.map(n =>
@@ -1673,6 +1704,7 @@ function irA(id) {
 function refrescar() {
   construirPlan();   // los cupos heredan requisitos de la optativa asignada
   pintarMalla();
+  pintarRuta();
   pintarResumen();
   if (!$('#vPlan').hidden) pintarPlan();
   if (!$('#vCatalogo').hidden) pintarCatalogo();
@@ -1691,11 +1723,12 @@ function init() {
   construirPlan();
   // Textos de la carrera (título, subtítulo, fuentes…) desde carreras/<slug>/carrera.js.
   const T = Object.assign({}, CARRERA_APP.textos || {});
-  ['titulo', 'subtitulo', 'logo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
+  ['titulo', 'subtitulo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
   $$('[data-texto]').forEach(el => { const v = T[el.dataset.texto]; if (v != null) el.textContent = v; });
   $$('[data-texto-html]').forEach(el => { const v = T[el.dataset.textoHtml]; if (v != null) el.innerHTML = v; });
   $$('[data-texto-placeholder]').forEach(el => { const v = T[el.dataset.textoPlaceholder]; if (v != null) el.placeholder = v; });
   if (CARRERA_APP.titulo) document.title = CARRERA_APP.titulo + ' · UNAL Bogotá';
+  if (typeof aplicarTemaCarrera === 'function') aplicarTemaCarrera(CARRERA_APP);   // color, icono y fondo de la carrera
   // El atajo de nivelación solo tiene sentido si la carrera tiene componentes que no cuentan.
   const bNiv0 = $('#btnNivelacion');
   if (bNiv0) bNiv0.hidden = !Object.values(COMPONENTES).some(c => c.noCuenta);
@@ -1874,6 +1907,27 @@ function init() {
   $('#buscaHor').addEventListener('input', sugerirHorario);
   $('#buscaHor').addEventListener('focus', sugerirHorario);
   $('#btnLimpiarResalte').addEventListener('click', () => { resaltado = null; refrescar(); });
+  // Énfasis / rutas sugeridas (si la carrera las define).
+  const selRuta = $('#selRuta');
+  if (selRuta) selRuta.addEventListener('change', () => { S.config.ruta = selRuta.value || null; guardar(); pintarRuta(); });
+  document.addEventListener('click', e => {
+    if (e.target.closest('[data-ruta-quitar]')) { S.config.ruta = null; guardar(); pintarRuta(); return; }
+    if (e.target.closest('[data-ruta-asignar]')) {
+      const r = LISTA_RUTAS.find(x => x.id === S.config.ruta); if (!r) return;
+      const ya = new Set([...Object.values(S.ranuras).map(v => codBase(v.cod)), ...PLAN.filter(a => !a.ranura).map(a => codBase(codDe(a)))]);
+      const libres = PLAN.filter(a => a.comp === 'LE' && a.ranura && !S.ranuras[a.id]);
+      let n = 0;
+      for (const a of r.asignaturas) {
+        if (ya.has(codBase(a.cod)) || !libres.length) continue;
+        const cupo = libres.shift(); const o = ofertaDe(a.cod);
+        S.ranuras[cupo.id] = { cod: a.cod, nombre: o ? o.nombre : a.nombre };
+        if (o && o.creditos) S.ranuras[cupo.id].cr = o.creditos;
+        ya.add(codBase(a.cod)); n++;
+      }
+      guardar(); refrescar();
+      avisar(n ? `${n} asignatura(s) del énfasis asignadas a tus cupos de libre elección.` : 'No había nada nuevo que asignar.');
+    }
+  });
   // Nivelación (inglés, matemáticas básicas, lecto-escritura): no todo el mundo la cursa.
   const bNiv = $('#btnNivelacion');
   if (bNiv) bNiv.addEventListener('click', () => {

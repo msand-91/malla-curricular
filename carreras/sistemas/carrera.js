@@ -7,7 +7,7 @@ const CARRERA = {
   nombre: 'Ingeniería de Sistemas y Computación',
   titulo: 'Malla Curricular · Ingeniería de Sistemas y Computación',
   subtitulo: 'Universidad Nacional de Colombia · Sede Bogotá · plan 2A74 (2023) · 165 créditos (+20 de nivelación)',
-  logo: '💻',
+  tema: 'sistemas',        // color, icono y fondo (js/temas.js)
   slug: 'sistemas',
   plan: '2A74',
   sede: /1101 SEDE BOGOT/,

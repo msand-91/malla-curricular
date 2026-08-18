@@ -588,10 +588,25 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
 .card.homologada { border-left-style: dashed; }
 .card.homologada .etq { background: transparent; color: var(--ok); border: 1px dashed var(--ok); }
 
+/* ------------------------------------------- identidad por carrera --------- */
+:root { --acento: #2563c4; --acento-2: #7aa6f0; }
+header.top { background: linear-gradient(100deg, color-mix(in srgb, var(--acento) 55%, #2a2a48), color-mix(in srgb, var(--acento-2) 35%, #3d3d68)); border-bottom: 3px solid var(--acento-2); }
+.logo { background: rgba(255,255,255,.14); color: #fff; border: 1.5px solid rgba(255,255,255,.35); backdrop-filter: blur(4px); }
+.logo svg { width: 22px; height: 22px; display: block; }
+nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
+.btn.primario { background: var(--acento); border-color: var(--acento); }
+.btn.primario:hover { background: color-mix(in srgb, var(--acento) 85%, #000); }
+.barra-progreso-global > div { background: linear-gradient(90deg, var(--acento), var(--acento-2)); }
+.hor-escenarios .esc.activo { border-color: var(--acento); }
+.ruta-panel { margin: -6px 0 14px; border-left: 4px solid var(--acento); }
+.ruta-panel .meta { font-size: 12.5px; color: var(--texto-2); margin: 0 0 8px; }
+.ruta-panel .req-lista .r.no { opacity: .6; }
+#lblRuta select { max-width: 260px; }
+
 </style>
 
 <header class="top">
-  <div class="logo" data-texto="logo">🎓</div>
+  <div class="logo" aria-hidden="true"></div>
   <div>
     <h1 data-texto="titulo">Malla curricular</h1>
     <p class="sub" data-texto="subtitulo">Universidad Nacional de Colombia · Sede Bogotá</p>
@@ -620,9 +635,12 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
       <input type="search" id="busca" placeholder="Buscar asignatura o código…">
       <label><input type="checkbox" id="chkDisp"> Solo lo que puedo inscribir</label>
       <button class="btn" id="btnNivelacion" title="Marca las asignaturas de nivelación (inglés, matemáticas básicas…) como exentas u homologadas" hidden>Nivelación: exento</button>
+      <label id="lblRuta"><span style="white-space:nowrap">Énfasis</span>
+        <select id="selRuta"><option value="">— ninguno —</option></select></label>
       <button class="btn" id="btnEdicion">✎ Editar malla</button>
       <button class="btn" id="btnLimpiarResalte" hidden>Quitar resalte</button>
     </div>
+    <div id="rutaCont" hidden></div>
     <details class="acordeon" id="ayudaMalla">
       <summary>¿Cómo funciona?</summary>
       <div>
@@ -787,7 +805,7 @@ const CARRERA = {
   nombre: 'Ingeniería de Sistemas y Computación',
   titulo: 'Malla Curricular · Ingeniería de Sistemas y Computación',
   subtitulo: 'Universidad Nacional de Colombia · Sede Bogotá · plan 2A74 (2023) · 165 créditos (+20 de nivelación)',
-  logo: '💻',
+  tema: 'sistemas',        // color, icono y fondo (js/temas.js)
   slug: 'sistemas',
   plan: '2A74',
   sede: /1101 SEDE BOGOT/,
@@ -809,14 +827,19 @@ const CARRERA = {
 /* ===== ../carreras/sistemas/losestudiantes.js ===== */
 /* ============================================================================
    losestudiantes.js — GENERADO AUTOMÁTICAMENTE, no editar a mano.
-   Fuente: losestudiantes.com · verificado el 2026-08-17
-   Regenerar con:  node herramientas/verificar-losestudiantes.js
+   Fuente: losestudiantes.com
+     · códigos y URLs verificados el 2026-08-17
+     · profesores por materia actualizados el 2026-08-18
+   Regenerar con:
+     node herramientas/verificar-losestudiantes.js     (códigos y enlaces)
+     node herramientas/sincronizar-profesores.js       (profesores)
    ========================================================================== */
 
 const LE_BASE_PROFESOR = 'https://losestudiantes.com/universidad-nacional/professors/';
 const LE_VERIFICADO = '2026-08-17';
+const LE_PROFESORES_ACTUALIZADO = '2026-08-18';
 
-/* código SIA -> { nombre tal como aparece allí, url de la materia } */
+/* código SIA -> { nombre, url, profesores: [{ nombre, slug, resenas, calidad }] } */
 const LOSESTUDIANTES = {
   "1000001": {
     "nombre": "Matematicas Basicas",
@@ -964,7 +987,128 @@ const LOSESTUDIANTES = {
   },
   "2016696": {
     "nombre": "Algoritmos",
-    "url": "https://losestudiantes.com/universidad-nacional/courses/2016696"
+    "url": "https://losestudiantes.com/universidad-nacional/courses/2016696",
+    "profesores": [
+      {
+        "nombre": "Diego Camilo Talero Osorio",
+        "slug": "diego-camilo-talero-osorio",
+        "resenas": 8,
+        "calidad": "buena",
+        "calificacion": 4.91,
+        "notaPromedio": 4.89,
+        "resenasOcultas": 7,
+        "resena": {
+          "texto": "Excelente docente, amable, tranquilo, explica muy bien, responde correos rapido, motiva y apasiona a sus estudiantes y ademas es muy flexible.",
+          "pros": "amable responsable apasionado tranquilo explica bien con dedicación se cinquea",
+          "contras": "demanda tiempo ya que hay talleres en uncode, ejercicios en moodle, el proyecto que se desarrolla durante todo el curso y un curso adicional del programa.",
+          "periodo": "2021-10 (virtual)",
+          "calificacion": 5,
+          "dificultad": 2
+        }
+      },
+      {
+        "nombre": "Fabio Augusto Gonzalez Osorio",
+        "slug": "fabio-augusto-gonzalez-osorio",
+        "resenas": 20,
+        "calidad": "buena",
+        "calificacion": 4.53,
+        "notaPromedio": 4.33,
+        "resenasOcultas": 19,
+        "resena": {
+          "texto": "El profesor Fabio es amable y se nota su interés por enseñar. Solamente hay clase una vez por semana y estas son dinámicas porque utiliza la metodología de aula invertida: los estudiantes explican los temas y el profesor hace preguntas para evaluar lo aprendido. El material del curso está disponible desde el primer día en una página web, que incluye videos grabados por el mismo profesor, prácticas no evaluables para resolver antes de las sesiones y más material de apoyo. Durante todo el semestre se realiza un curso adicional en línea sobre Machine Learning con Python; los ejercicios no son…",
+          "pros": "Organizado con las notas y las fechas",
+          "contras": null,
+          "periodo": "2025-2",
+          "calificacion": 4,
+          "dificultad": 3.5
+        }
+      },
+      {
+        "nombre": "Juan Sebastian Chaves Ramirez",
+        "slug": "juan-sebastian-chaves-ramirez",
+        "resenas": 1,
+        "calidad": "buena",
+        "calificacion": 4.2,
+        "notaPromedio": 4.6,
+        "resenasOcultas": 0,
+        "resena": {
+          "texto": "Explica de forma teórica o conceptual los algoritmos y se evalua cómo aplicarlos en ejercicios de tipo programación competitiva y cómo calcular la complejidad en tiempo y memoria, o a veces haciendo diagramas para explicar alguna idea de un algoritmo.",
+          "pros": "- El profe está muy dispuesto a ayudarle si tiene problemas resolviendo algo - Comunicación clara de fechas de entrega e indicaciones para los trabajos - Es algo estricto y espera que uno se comprometa con su…",
+          "contras": "- Se entregan muchos ejercicios, entonces la materia se vuelve pesada si no se organiza bien - Aunque la materia es virtual, no es para dormirse o verla en el bus desde el celular, porque frecuentemente hay quices…",
+          "periodo": "2024-2",
+          "calificacion": 4.2,
+          "dificultad": 4
+        }
+      },
+      {
+        "nombre": "Edwin Camilo Cubides Garzon",
+        "slug": "edwin-camilo-cubides-garzon",
+        "resenas": 15,
+        "calidad": "regular",
+        "calificacion": 3.94,
+        "notaPromedio": 4.18,
+        "resenasOcultas": 14,
+        "resena": {
+          "texto": "Siempre contesta todas las preguntas, se deja hablar, los talleres de los jueves son bastante trabajables, se puede pasar, se esfuerza por que le entiendan.",
+          "pros": "Es amable y siempre contesta preguntas. Se preocupa por que aprendas. Ayuda si ve que todos van muy mal.",
+          "contras": "Se enfoca mas en la parte matematica a mi me gustan mas los problemas aplicados.",
+          "periodo": "2025-2",
+          "calificacion": 5,
+          "dificultad": 3
+        }
+      },
+      {
+        "nombre": "Osman David Jimenez Gutierrez",
+        "slug": "osman-david-jimenez-gutierrez",
+        "resenas": 1,
+        "calidad": "buena",
+        "calificacion": 3.8,
+        "notaPromedio": 4.2,
+        "resenasOcultas": 0,
+        "resena": {
+          "texto": "En general me pareció buen profesor. Cada uno de los temas los explicaba en paint y, después de mostrar el código de dicha explicación, dejaba un contest en vjudge del tema en cuestión y dependiendo del número de ejercicios resueltos sacaba la nota, en varios de ellos era posible sacarse más de 5. También hizo varios quices \"sorpresa\" sobre el tema del que se estaba hablando en clase, que servían para subir la nota (si le quedaba mal no le contaba). Los dos parciales que hizo los dividió en una parte teórica y otra práctica, las teóricas no eran la mayor cosa pero en las prácticas solo una…",
+          "pros": "- Da muchas ayudas para subir nota. - A mi parecer explica muy bien los algoritmos y los distintos trucos para optimizar el código. - Está siempre dispuesto a resolver dudas. - Daba las clases en meet al mismo tiempo,…",
+          "contras": "- Todo el tema de complejidad algorítmica se vio muy por encima y no se vió nada de árboles.",
+          "periodo": "2023-1",
+          "calificacion": 3.8,
+          "dificultad": 3
+        }
+      },
+      {
+        "nombre": "Juan Carlos Mendivelso Moreno",
+        "slug": "juan-carlos-mendivelso-moreno",
+        "resenas": 40,
+        "calidad": "regular",
+        "calificacion": 3.13,
+        "notaPromedio": 3.81,
+        "resenasOcultas": 39,
+        "resena": {
+          "texto": "Cuando metí con Mendivelso me dijeron que eso era un suicidio, que por mucho pasaba con 3, que muchos reprueban, que exige mucho nivel de matemáticas, etc, etc... ¿Lo considero trivial? No en realidad, pero de que es imposible pasar o con buena nota tampoco. Eso sí, evidentemente es una gran desventaja en PAPPI comparado con Germán, pero siento que el curso es de muy buena calidad técnica, y definitivamente toca ver con él si hay interés especial por el tema, en vez de pasar por pasar. Si creo que hay cosas por mejorar, personalmente me chocó mucho algunas de las prácticas que no eran…",
+          "pros": "Manejo del tema Tareas sencillas (tal vez cambie) Eliminó el peor quiz y la peor tarea de cada estudiante",
+          "contras": "Muy rápido (responde dudas pero muy a la carrera porque siempre intenta abarcar mucho) Muy cerrado a quejas y reclamos No deja tomar apuntes en la corrección de los parciales",
+          "periodo": "2025-1",
+          "calificacion": 4,
+          "dificultad": 4
+        }
+      },
+      {
+        "nombre": "German Jairo Hernandez Perez",
+        "slug": "german-jairo-hernandez-perez",
+        "resenas": 52,
+        "calidad": "regular",
+        "calificacion": 2.84,
+        "notaPromedio": 4.82,
+        "resenasOcultas": 51,
+        "resena": {
+          "texto": "zzzz German es un profesor demasiado perezoso, y a medida que pasa el semestre eso se vuelve algo muy fastidioso, ya que no vale ni la pena ir a sus clases, realmente algoritmos siendo una materia importante y tan chevere vale la pena mejor verla con alguien mas, no pierda su tiempo",
+          "pros": "no requiere tiempo",
+          "contras": "no va a aprender nada, y menos de algoritmos",
+          "periodo": "2026-2",
+          "calificacion": 1.6,
+          "dificultad": 1.6
+        }
+      }
+    ]
   },
   "2016697": {
     "nombre": "Arquitectura De Computadores",
@@ -39778,6 +39922,147 @@ const GRUPOS_CATALOGO = {
 const GRUPOS_DISCIPLINARES = ['software', 'infraestructura', 'inteligentes', 'modelos', 'hardware', 'gestion'];
 
 /* ============================================================================
+   ÉNFASIS / RUTAS CURRICULARES SUGERIDAS (PEP, plan 2879, 2014)
+   ----------------------------------------------------------------------------
+   Ninguna es obligatoria. Cada ruta propone asignaturas para llenar los cupos
+   de libre elección (y sustituir casillas «con opciones»). Los nombres se
+   verificaron por código en losestudiantes.com; los marcados porConfirmar se
+   tomaron del texto del PEP y conviene confirmarlos en el SIA. Muchas no
+   aparecen hoy en el plan 2A74 del SIA: la app indica si están en la oferta.
+   ========================================================================== */
+const RUTAS = [
+  { id: 'ISW', nombre: 'Ingeniería de Software', descripcion: 'Desarrollo y arquitectura de software: bases de datos avanzadas, patrones, aplicaciones móviles, minería de datos.',
+    asignaturas: [
+      { cod: '2019765', nombre: 'Bases de datos avanzadas', porConfirmar: true },
+      { cod: '2019762', nombre: 'Algoritmia avanzada', porConfirmar: true },
+      { cod: '2019772', nombre: 'Temas avanzados en ingeniería de software I', porConfirmar: true },
+      { cod: '2019795', nombre: 'Ingeniería de software avanzada', porConfirmar: true },
+      { cod: '2016732', nombre: 'Patrones de software', porConfirmar: true },
+      { cod: '2019773', nombre: 'Mineria De Datos' },
+      { cod: '2026213', nombre: 'Desarrollo de aplicaciones móviles', porConfirmar: true },
+    ] },
+  { id: 'SINT', nombre: 'Sistemas Inteligentes', descripcion: 'Aprendizaje de máquina, recuperación de información, lingüística computacional, neurociencia computacional.',
+    asignaturas: [
+      { cod: '2019818', nombre: 'Sistemas Inteligentes' },
+      { cod: '2026442', nombre: 'Lingüística computacional', porConfirmar: true },
+      { cod: '2019779', nombre: 'Recuperación de información', porConfirmar: true },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+      { cod: '2026484', nombre: 'Computational neuroscience', porConfirmar: true },
+      { cod: '2012033', nombre: 'Aprendizaje de máquina', porConfirmar: true },
+    ] },
+  { id: 'TELECOM', nombre: 'Telecomunicaciones', descripcion: 'Señales, campos electromagnéticos, líneas y antenas, comunicaciones ópticas y negocios en telecomunicaciones.',
+    asignaturas: [
+      { cod: '2016487', nombre: 'Campos Electromagneticos' },
+      { cod: '2016503', nombre: 'Lineas Y Antenas' },
+      { cod: '2025783', nombre: 'Optoelectrónica y comunicaciones ópticas', porConfirmar: true },
+      { cod: '2023708', nombre: 'Ingenieria De Nuevos Negocios En Telecomunicaciones' },
+      { cod: '1000007', nombre: 'Ecuaciones Diferenciales' },
+      { cod: '2016506', nombre: 'Señales Y Sistemas I' },
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+    ] },
+  { id: 'BIOINF', nombre: 'Bioinformática y Computación Bioinspirada', descripcion: 'Bioinformática, vida artificial, aprendizaje de máquina y estadística aplicada sobre una base de biología general.',
+    asignaturas: [
+      { cod: '1000009', nombre: 'Biologia General' },
+      { cod: '2016839', nombre: 'Bioinformática', porConfirmar: true },
+      { cod: '2012033', nombre: 'Aprendizaje de máquina', porConfirmar: true },
+      { cod: '2019779', nombre: 'Recuperación de información', porConfirmar: true },
+      { cod: '2025439', nombre: 'Programacion Y Algoritmos En Bioinformatica' },
+      { cod: '2012046', nombre: 'Vida artificial', porConfirmar: true },
+      { cod: '2020933', nombre: 'Metodos Estadisticos Aplicados' },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+    ] },
+  { id: 'BIOMED', nombre: 'Ingeniería Biomédica', descripcion: 'Señales y sistemas, circuitos, procesamiento de imágenes y fundamentos de ingeniería biomédica.',
+    asignaturas: [
+      { cod: '1000009', nombre: 'Biologia General' },
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+      { cod: '1000007', nombre: 'Ecuaciones Diferenciales' },
+      { cod: '2016506', nombre: 'Señales Y Sistemas I' },
+      { cod: '2016765', nombre: 'Fundamentos de ingeniería biomédica', porConfirmar: true },
+      { cod: '2015159', nombre: 'Variable Compleja' },
+      { cod: '2016507', nombre: 'Señales Y Sistemas Ii' },
+      { cod: '2023644', nombre: 'Procesamiento de imágenes', porConfirmar: true },
+    ] },
+  { id: 'HW', nombre: 'Hardware', descripcion: 'Circuitos, electrónica análoga y digital, sistemas embebidos y verificación de sistemas digitales.',
+    asignaturas: [
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+      { cod: '2016495', nombre: 'Electronica Analoga I' },
+      { cod: '2001880', nombre: 'Tecnología digital', porConfirmar: true },
+      { cod: '2016499', nombre: 'Electronica Digital Ii' },
+      { cod: '2016512', nombre: 'Verificacion De Sistemas Digitales' },
+      { cod: '2016505', nombre: 'Sistemas embebidos', porConfirmar: true },
+    ] },
+  { id: 'CIENCOMP', nombre: 'Ciencias de la Computación', descripcion: 'Matemáticas para computación: lógica, conjuntos, combinatoria, grafos, álgebra abstracta, análisis real y numérico.',
+    asignaturas: [
+      { cod: '2026519', nombre: 'Ecuaciones en diferencias y sistemas dinámicos', porConfirmar: true },
+      { cod: '2026555', nombre: 'Álgegra Abstracta y Computacional' },
+      { cod: '2015155', nombre: 'Introduccion Al Analisis Real' },
+      { cod: '2015150', nombre: 'Analisis Numerico' },
+      { cod: '2015156', nombre: 'Logica Matematica' },
+      { cod: '2025819', nombre: 'Introduccion A La Teoria De Conjuntos' },
+      { cod: '2026548', nombre: 'Introducción al análisis combinatorio', porConfirmar: true },
+      { cod: '2015184', nombre: 'Teoría de Grafos' },
+      { cod: '2015177', nombre: 'Modelos matemáticos', porConfirmar: true },
+    ] },
+  { id: 'MODOPTSIM', nombre: 'Modelos, Optimización y Simulación', descripcion: 'Modelos matemáticos, optimización, simulación de procesos, logística, costos y economía.',
+    asignaturas: [
+      { cod: '2016592', nombre: 'Economia General' },
+      { cod: '2016610', nombre: 'Sistemas De Costos' },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+      { cod: '2007975', nombre: 'Análisis real', porConfirmar: true },
+      { cod: '2015150', nombre: 'Analisis Numerico' },
+      { cod: '2025987', nombre: 'Modelos Estocasticos Para Procesos De Manufactura Y Sistemas De Servicios' },
+      { cod: '2016605', nombre: 'Logistica' },
+      { cod: '2025988', nombre: 'Taller De Simulacion Procesos De Manufactura Y Sistemas De Servicios' },
+      { cod: '2015177', nombre: 'Modelos matemáticos', porConfirmar: true },
+    ] },
+  { id: 'VISIOROBOT', nombre: 'Visión y Robótica', descripcion: 'Señales, electrónica, variable compleja y robótica para visión artificial y robótica.',
+    asignaturas: [
+      { cod: '2015159', nombre: 'Variable Compleja' },
+      { cod: '2016507', nombre: 'Señales Y Sistemas Ii' },
+      { cod: '2016770', nombre: 'Robotica' },
+      { cod: '1000007', nombre: 'Ecuaciones Diferenciales' },
+      { cod: '2016506', nombre: 'Señales Y Sistemas I' },
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+      { cod: '2016495', nombre: 'Electronica Analoga I' },
+    ] },
+  { id: 'CREDIGMEDANIM', nombre: 'Medios Digitales y Animación', descripcion: 'Medios digitales, videojuegos, animación y fundamentos tecnológicos del diseño (con la Facultad de Artes).',
+    asignaturas: [
+      { cod: '2016093', nombre: 'Taller De Enfasis En Animacion Y Narrativas Audiovisuales I' },
+      { cod: '2026511', nombre: 'Desarrollo De Videojuegos' },
+      { cod: '2016749', nombre: 'Introduction to data science and data visualization', porConfirmar: true },
+      { cod: '2016083', nombre: 'Produccion En Medios Digitales' },
+      { cod: '2016091', nombre: 'Taller De Enfasis En Multimedia E Imagen Digital I' },
+      { cod: '2016070', nombre: 'Fundamentos Tecnologicos: Formatos Y Medidas' },
+      { cod: '2016071', nombre: 'Fundamentos Tecnologicos: Tipometria' },
+      { cod: '2016069', nombre: 'Fundamentos Tecnologicos: Color Y Produccion' },
+    ] },
+  { id: 'DATASCI', nombre: 'Ciencia de Datos', descripcion: 'Ciencia de datos: aprendizaje de máquina, minería de datos, inferencia y regresión, bases de datos avanzadas.',
+    asignaturas: [
+      { cod: '2019779', nombre: 'Recuperación de información', porConfirmar: true },
+      { cod: '2012033', nombre: 'Aprendizaje de máquina', porConfirmar: true },
+      { cod: '2016749', nombre: 'Introduction to data science and data visualization', porConfirmar: true },
+      { cod: '2016360', nombre: 'Analisis De Regresion' },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+      { cod: '2019773', nombre: 'Mineria De Datos' },
+      { cod: '2019765', nombre: 'Bases de datos avanzadas', porConfirmar: true },
+    ] },
+  { id: 'TIC', nombre: 'TIC y Gobierno Electrónico', descripcion: 'Gestión de TIC y gobierno electrónico: gestión de TI, geomática, calidad de servicio y gerencia de proyectos públicos.',
+    asignaturas: [
+      { cod: '2026538', nombre: 'Taller Aplicado Al Gobierno Electronico' },
+      { cod: '2026502', nombre: 'Gestion De Las Tecnologias De Informacion' },
+      { cod: '2011263', nombre: 'Geomática', porConfirmar: true },
+      { cod: '2026537', nombre: 'La Calidad De Servicio En El Gobierno Electronico' },
+      { cod: '2026231', nombre: 'Tecnologias De Informacion Y Gobierno Electronico' },
+      { cod: '2026440', nombre: 'Gerencia De Proyectos Aplicado Al Gobierno Electronico' },
+      { cod: '2026208', nombre: 'Introduccion Al Gobierno Electronico' },
+    ] },
+];
+
+/* ============================================================================
    Notas sobre los datos y sus fuentes
    ========================================================================== */
 const INCONSISTENCIAS = [
@@ -39788,6 +40073,65 @@ const INCONSISTENCIAS = [
   { asig: 'Énfasis / rutas curriculares', detalle: 'El PEP (plan 2879, 2014) publica 12 rutas sugeridas: Ingeniería de software, Sistemas inteligentes, Telecomunicaciones, Bioinformática, Ingeniería biomédica, Hardware, Ciencias de la computación, Modelos/optimización/simulación, Visión y robótica, Medios digitales y animación, Ciencia de datos y TIC/gobierno electrónico. Ninguna es obligatoria: cada una llena los cupos con opciones y las electivas con asignaturas concretas. Muchas de esas asignaturas no aparecen hoy en el plan 2A74 del SIA (p. ej. Aprendizaje de máquina, Minería de datos, Robótica); si quieres seguir un énfasis, búscalas en Libre elección o en el SIA y añádelas a tus cupos.' },
   { asig: 'Trabajo de grado', detalle: 'Tres modalidades en el SIA, todas de 6 créditos: 2025974 (trabajos investigativos, la que usa la app), 2025973 (práctica de extensión) y 2016843 (asignaturas de posgrado).' },
 ];
+
+
+/* ===== ../js/temas.js ===== */
+/* ============================================================================
+   temas.js — identidad visual por carrera: color de acento, icono minimalista
+   (SVG de línea) y patrón de fondo. Cada carrera indica su tema en carrera.js
+   con `tema: 'quimica'` (o define uno propio con la misma forma).
+   Los patrones son SVG en línea, en el color de acento y muy tenues; se ponen
+   como fondo fijo del <body> para que la página respire un poco de la carrera.
+   ========================================================================== */
+const TEMAS = {
+  quimica: {
+    acento: '#0f9aa8', acento2: '#5cc8d2',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3h5M10.5 3v5.2L5.6 16.6A2.6 2.6 0 0 0 7.9 20.5h8.2a2.6 2.6 0 0 0 2.3-3.9L13.5 8.2V3"/><path d="M8 14.5h8"/></svg>',
+    // Hexágonos: anillos de benceno, muy tenues.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97" viewBox="0 0 56 97"><g fill="none" stroke="ACENTO" stroke-width="1"><path d="M28 2 54 17v30L28 62 2 47V17z"/><path d="M28 50 54 65v30L28 110 2 95V65z"/><path d="M0 -14 26 1v30L0 46 -26 31V1z"/><path d="M56 -14 82 1v30L56 46 30 31V1z"/></g></svg>',
+  },
+  biologia: {
+    acento: '#2f9e5b', acento2: '#7fd39c',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5C4.5 11 10 5.5 20 4c-1 10-6.5 15.5-15.5 15.5z"/><path d="M4.5 19.5C8 14.5 11.5 11 16 8"/></svg>',
+    // Nervaduras / hojas estilizadas.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><g fill="none" stroke="ACENTO" stroke-width="1" stroke-linecap="round"><path d="M10 110C10 70 40 40 90 30c-8 45-35 72-80 80z"/><path d="M10 110c15-25 32-42 55-58"/><path d="M75 15c20-3 35 5 42 20"/><path d="M85 12c4 8 6 14 6 22"/></g></svg>',
+  },
+  sistemas: {
+    acento: '#5b6cf5', acento2: '#9aa5ff',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6.5" r="2.2"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M8.2 6.5h7.6M7 8.6l4 7.2M17 8.6l-4 7.2"/></svg>',
+    // Circuito: nodos y trazas ortogonales.
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><g fill="none" stroke="ACENTO" stroke-width="1" stroke-linecap="round"><path d="M10 20h40v30h40M50 20v-15M90 50v40h-30v40M90 90h35M10 110h25v-30"/><circle cx="10" cy="20" r="2.5"/><circle cx="90" cy="50" r="2.5"/><circle cx="60" cy="90" r="2.5"/><circle cx="125" cy="90" r="2.5"/><circle cx="35" cy="80" r="2.5"/><circle cx="10" cy="110" r="2.5"/></g></svg>',
+  },
+  generico: {
+    acento: '#2563c4', acento2: '#7aa6f0',
+    icono: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-4 9 4-9 4-9-4z"/><path d="M7 11v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5"/></svg>',
+    patron: '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="1.2" fill="ACENTO"/></svg>',
+  },
+};
+
+/** Tema resuelto para una carrera (por nombre de tema o por objeto propio). */
+function temaDe(carrera) {
+  const t = carrera && carrera.tema;
+  return (typeof t === 'object' && t) || TEMAS[t] || TEMAS[carrera && carrera.slug] || TEMAS.generico;
+}
+
+/** Fondo del <body>: el patrón del tema, en su color y con la opacidad dada. */
+function fondoTema(tema, opacidad = 0.07) {
+  const svg = tema.patron.replace(/ACENTO/g, tema.acento).replace(/stroke="([^"]+)"/g, 'stroke="$1" stroke-opacity="' + opacidad + '"').replace(/fill="(#[^"]+)"/g, 'fill="$1" fill-opacity="' + opacidad + '"');
+  return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+}
+
+/** Aplica la identidad de la carrera al documento: variables CSS, icono y fondo. */
+function aplicarTemaCarrera(carrera) {
+  const t = temaDe(carrera);
+  const r = document.documentElement;
+  r.style.setProperty('--acento', t.acento);
+  r.style.setProperty('--acento-2', t.acento2);
+  document.body.style.backgroundImage = fondoTema(t);
+  document.body.style.backgroundAttachment = 'fixed';
+  document.querySelectorAll('.logo').forEach(el => { el.innerHTML = t.icono; });
+  return t;
+}
 
 
 /* ===== ../js/app.js ===== */
@@ -41447,6 +41791,37 @@ function sugerirHorario() {
   caja.hidden = false;
 }
 
+/* ------------------------------------------------------------ énfasis ---- */
+const LISTA_RUTAS = typeof RUTAS === 'object' && Array.isArray(RUTAS) ? RUTAS : [];
+
+/** Panel del énfasis elegido: sus asignaturas, si están en la oferta y en qué cupo van. */
+function pintarRuta() {
+  const cont = $('#rutaCont'); const sel = $('#selRuta');
+  if (!cont || !sel) return;
+  if (!LISTA_RUTAS.length) { cont.hidden = true; sel.closest('label').hidden = true; return; }
+  if (sel.options.length <= 1) LISTA_RUTAS.forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.nombre; sel.appendChild(o); });
+  sel.value = S.config.ruta || '';
+  const r = LISTA_RUTAS.find(x => x.id === sel.value);
+  if (!r) { cont.hidden = true; return; }
+  cont.hidden = false;
+  const asignadas = new Map(); for (const [slot, v] of Object.entries(S.ranuras)) if (v.cod) asignadas.set(codBase(v.cod), slot);
+  const filas = r.asignaturas.map(a => {
+    const o = ofertaDe(a.cod); const enPlan = PLAN.some(x => codBase(codDe(x)) === codBase(a.cod) && !x.ranura);
+    const estado = enPlan ? 'ya está en tu malla' : asignadas.has(codBase(a.cod)) ? 'asignada a un cupo' : o ? (o.actividades.some(x => x.grupos.length) ? 'en la oferta de este semestre' : 'en el SIA, sin grupos este semestre') : 'no aparece en la oferta actual';
+    const clase = enPlan || asignadas.has(codBase(a.cod)) ? 'si' : o ? '' : 'no';
+    return `<div class="r ${clase}"><span class="ic">${clase === 'si' ? '✔' : clase === 'no' ? '·' : '○'}</span><span>${esc(o ? o.nombre : a.nombre)} <small>(${esc(a.cod)}${o ? ' · ' + o.creditos + ' cr' : ''}${a.porConfirmar ? ' · nombre por confirmar' : ''}) — ${estado}</small></span></div>`;
+  }).join('');
+  const libres = PLAN.filter(a => a.comp === 'LE' && a.ranura && !S.ranuras[a.id]).length;
+  cont.innerHTML = `<div class="panel ruta-panel"><h3>Énfasis: ${esc(r.nombre)} <span class="hint">— ruta sugerida por el PEP, no obligatoria</span></h3>
+    <p class="meta">${esc(r.descripcion || '')}</p>
+    <div class="req-lista">${filas}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <button class="btn primario" data-ruta-asignar ${libres ? '' : 'disabled'}>Llenar mis ${libres} cupo${libres === 1 ? '' : 's'} de libre elección con este énfasis</button>
+      <button class="btn" data-ruta-quitar>Quitar el énfasis</button>
+      <span class="meta">Se asignan en orden a los cupos libres las que aún no tengas; puedes cambiar cualquiera después desde su cupo.</span>
+    </div></div>`;
+}
+
 /* ------------------------------------------------------------------- notas */
 function pintarNotas() {
   $('#notasCont').innerHTML = INCONSISTENCIAS.map(n =>
@@ -41466,6 +41841,7 @@ function irA(id) {
 function refrescar() {
   construirPlan();   // los cupos heredan requisitos de la optativa asignada
   pintarMalla();
+  pintarRuta();
   pintarResumen();
   if (!$('#vPlan').hidden) pintarPlan();
   if (!$('#vCatalogo').hidden) pintarCatalogo();
@@ -41484,11 +41860,12 @@ function init() {
   construirPlan();
   // Textos de la carrera (título, subtítulo, fuentes…) desde carreras/<slug>/carrera.js.
   const T = Object.assign({}, CARRERA_APP.textos || {});
-  ['titulo', 'subtitulo', 'logo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
+  ['titulo', 'subtitulo'].forEach(k => { if (CARRERA_APP[k]) T[k] = CARRERA_APP[k]; });
   $$('[data-texto]').forEach(el => { const v = T[el.dataset.texto]; if (v != null) el.textContent = v; });
   $$('[data-texto-html]').forEach(el => { const v = T[el.dataset.textoHtml]; if (v != null) el.innerHTML = v; });
   $$('[data-texto-placeholder]').forEach(el => { const v = T[el.dataset.textoPlaceholder]; if (v != null) el.placeholder = v; });
   if (CARRERA_APP.titulo) document.title = CARRERA_APP.titulo + ' · UNAL Bogotá';
+  if (typeof aplicarTemaCarrera === 'function') aplicarTemaCarrera(CARRERA_APP);   // color, icono y fondo de la carrera
   // El atajo de nivelación solo tiene sentido si la carrera tiene componentes que no cuentan.
   const bNiv0 = $('#btnNivelacion');
   if (bNiv0) bNiv0.hidden = !Object.values(COMPONENTES).some(c => c.noCuenta);
@@ -41667,6 +42044,27 @@ function init() {
   $('#buscaHor').addEventListener('input', sugerirHorario);
   $('#buscaHor').addEventListener('focus', sugerirHorario);
   $('#btnLimpiarResalte').addEventListener('click', () => { resaltado = null; refrescar(); });
+  // Énfasis / rutas sugeridas (si la carrera las define).
+  const selRuta = $('#selRuta');
+  if (selRuta) selRuta.addEventListener('change', () => { S.config.ruta = selRuta.value || null; guardar(); pintarRuta(); });
+  document.addEventListener('click', e => {
+    if (e.target.closest('[data-ruta-quitar]')) { S.config.ruta = null; guardar(); pintarRuta(); return; }
+    if (e.target.closest('[data-ruta-asignar]')) {
+      const r = LISTA_RUTAS.find(x => x.id === S.config.ruta); if (!r) return;
+      const ya = new Set([...Object.values(S.ranuras).map(v => codBase(v.cod)), ...PLAN.filter(a => !a.ranura).map(a => codBase(codDe(a)))]);
+      const libres = PLAN.filter(a => a.comp === 'LE' && a.ranura && !S.ranuras[a.id]);
+      let n = 0;
+      for (const a of r.asignaturas) {
+        if (ya.has(codBase(a.cod)) || !libres.length) continue;
+        const cupo = libres.shift(); const o = ofertaDe(a.cod);
+        S.ranuras[cupo.id] = { cod: a.cod, nombre: o ? o.nombre : a.nombre };
+        if (o && o.creditos) S.ranuras[cupo.id].cr = o.creditos;
+        ya.add(codBase(a.cod)); n++;
+      }
+      guardar(); refrescar();
+      avisar(n ? `${n} asignatura(s) del énfasis asignadas a tus cupos de libre elección.` : 'No había nada nuevo que asignar.');
+    }
+  });
   // Nivelación (inglés, matemáticas básicas, lecto-escritura): no todo el mundo la cursa.
   const bNiv = $('#btnNivelacion');
   if (bNiv) bNiv.addEventListener('click', () => {

@@ -578,3 +578,18 @@ details.ficha p { margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 
 /* ---------------------------------------------- homologada / exenta ------- */
 .card.homologada { border-left-style: dashed; }
 .card.homologada .etq { background: transparent; color: var(--ok); border: 1px dashed var(--ok); }
+
+/* ------------------------------------------- identidad por carrera --------- */
+:root { --acento: #2563c4; --acento-2: #7aa6f0; }
+header.top { background: linear-gradient(100deg, color-mix(in srgb, var(--acento) 55%, #2a2a48), color-mix(in srgb, var(--acento-2) 35%, #3d3d68)); border-bottom: 3px solid var(--acento-2); }
+.logo { background: rgba(255,255,255,.14); color: #fff; border: 1.5px solid rgba(255,255,255,.35); backdrop-filter: blur(4px); }
+.logo svg { width: 22px; height: 22px; display: block; }
+nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
+.btn.primario { background: var(--acento); border-color: var(--acento); }
+.btn.primario:hover { background: color-mix(in srgb, var(--acento) 85%, #000); }
+.barra-progreso-global > div { background: linear-gradient(90deg, var(--acento), var(--acento-2)); }
+.hor-escenarios .esc.activo { border-color: var(--acento); }
+.ruta-panel { margin: -6px 0 14px; border-left: 4px solid var(--acento); }
+.ruta-panel .meta { font-size: 12.5px; color: var(--texto-2); margin: 0 0 8px; }
+.ruta-panel .req-lista .r.no { opacity: .6; }
+#lblRuta select { max-width: 260px; }

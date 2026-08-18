@@ -9,7 +9,7 @@
 <body>
 
 <header class="top">
-  <div class="logo" data-texto="logo">🎓</div>
+  <div class="logo" aria-hidden="true"></div>
   <div>
     <h1 data-texto="titulo">Malla curricular</h1>
     <p class="sub" data-texto="subtitulo">Universidad Nacional de Colombia · Sede Bogotá</p>
@@ -38,9 +38,12 @@
       <input type="search" id="busca" placeholder="Buscar asignatura o código…">
       <label><input type="checkbox" id="chkDisp"> Solo lo que puedo inscribir</label>
       <button class="btn" id="btnNivelacion" title="Marca las asignaturas de nivelación (inglés, matemáticas básicas…) como exentas u homologadas" hidden>Nivelación: exento</button>
+      <label id="lblRuta"><span style="white-space:nowrap">Énfasis</span>
+        <select id="selRuta"><option value="">— ninguno —</option></select></label>
       <button class="btn" id="btnEdicion">✎ Editar malla</button>
       <button class="btn" id="btnLimpiarResalte" hidden>Quitar resalte</button>
     </div>
+    <div id="rutaCont" hidden></div>
     <details class="acordeon" id="ayudaMalla">
       <summary>¿Cómo funciona?</summary>
       <div>
@@ -200,6 +203,7 @@
 <script src="../carreras/quimica/electivas.js"></script>
 <script src="../carreras/quimica/oferta.js"></script>
 <script src="../carreras/quimica/datos.js"></script>
+<script src="../js/temas.js"></script>
 <script src="../js/app.js"></script>
 </body>
 </html>

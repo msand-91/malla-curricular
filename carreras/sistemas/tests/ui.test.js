@@ -18,7 +18,7 @@ const src = fs.readFileSync(cdir + '/carrera.js', 'utf8') + '\n'
   + fs.readFileSync(cdir + '/sia.js', 'utf8') + '\n'
   + fs.readFileSync(cdir + '/electivas.js', 'utf8') + '\n'
   + fs.readFileSync(cdir + '/oferta.js', 'utf8') + '\n'
-  + fs.readFileSync(cdir + '/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
+  + fs.readFileSync(cdir + '/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/temas.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
 w.eval(src + '\n;window.__api = { get S(){return S}, get PLAN(){return PLAN},'
   + ' get PLAN_POR_ID(){return PLAN_POR_ID}, CATALOGO, guardar, refrescar, construirPlan,'
   + ' moverAsignatura, abrirEditor, GRUPOS_CATALOGO, GRUPOS_DISCIPLINARES, metricas, OFERTA_MAP };');
@@ -41,6 +41,8 @@ chk($('#resumenKpis').children.length === 4, 'panel de avance con 4 KPIs');
 chk($$('#notasCont details').length > 0, `${$$('#notasCont details').length} notas sobre los datos`);
 chk(!$('#btnNivelacion').hidden, 'la carrera tiene nivelación y se ofrece el atajo');
 
+chk($('.logo svg') !== null, 'el logo es el icono SVG de la carrera');
+chk(w.document.documentElement.style.getPropertyValue('--acento') !== '', 'el color de acento de la carrera está aplicado');
 console.log('\n[B] Estado inicial de disponibilidad');
 const disp = $$('#malla .card.disponible').length, bloq = $$('#malla .card.bloqueada').length;
 chk(disp > 0 && disp + bloq === N, 'toda tarjeta es disponible o bloqueada al inicio');
@@ -85,6 +87,21 @@ $('[data-vista="vMalla"]').dispatchEvent(new w.MouseEvent('click', { bubbles: tr
 const grupos = [...$$('#detalle #selRanura optgroup')].map(g => g.label);
 chk(grupos.length === 3, `el cupo de electiva ofrece ${grupos.length} familias`);
 $('#detalle').close();
+
+console.log('\n[R2] Énfasis sugeridos');
+$('[data-vista="vMalla"]').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+chk($('#selRuta').options.length === 13, `el selector ofrece los 12 énfasis del PEP (${$('#selRuta').options.length - 1})`);
+$('#selRuta').value = 'DATASCI'; $('#selRuta').dispatchEvent(new w.Event('change', { bubbles: true }));
+chk(!$('#rutaCont').hidden && $('#rutaCont').textContent.includes('Ciencia de Datos'), 'al elegir uno aparece su panel');
+chk($$('#rutaCont .req-lista .r').length >= 5, `lista sus asignaturas (${$$('#rutaCont .req-lista .r').length})`);
+w.__api.S.ranuras = {}; w.__api.guardar(); w.__api.refrescar();
+$('#rutaCont [data-ruta-asignar]').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+const asignadasRuta = Object.keys(w.__api.S.ranuras).filter(k => k.startsWith('ELE_'));
+chk(asignadasRuta.length >= 5, `«Llenar mis cupos» asigna el énfasis a los cupos de libre elección (${asignadasRuta.length})`);
+chk(w.__api.S.config.ruta === 'DATASCI', 'el énfasis elegido se guarda');
+$('#rutaCont [data-ruta-quitar]').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+chk($('#rutaCont').hidden && !w.__api.S.config.ruta, 'y se puede quitar');
+w.__api.S.ranuras = {}; w.__api.guardar(); w.__api.refrescar();
 
 console.log('\n[U] Coherencia de la malla 2A74');
 let adelantadas = 0;

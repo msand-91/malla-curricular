@@ -7,7 +7,7 @@ const CARRERA = {
   nombre: 'Biología',
   titulo: 'Malla Curricular · Pregrado en Biología',
   subtitulo: 'Universidad Nacional de Colombia · Sede Bogotá · 163 créditos (+12 de inglés)',
-  logo: '🌿',
+  tema: 'biologia',        // color, icono y fondo (js/temas.js)
   slug: 'biologia',
   plan: '2513',                                  // código del plan de estudios en el SIA
   sede: /1101 SEDE BOGOT/,                       // textos de las listas del Catálogo del SIA

@@ -4,14 +4,12 @@
    Añade a carreras/<slug>/losestudiantes.js la lista de profesores que dicta cada materia,
    tal como aparece en el panel lateral de losestudiantes.com.
 
-   Por qué hace falta un navegador: esa lista NO viene en el HTML que sirve el
-   servidor, se carga después con JavaScript. Por eso aquí se renderiza la
-   página con Chrome headless y se lee el resultado. La app en sí no puede
-   hacerlo (el sitio no envía cabeceras CORS), de ahí que se cachee el
-   resultado en un archivo que la app carga como <script>.
+   Antes hacía falta Chrome headless porque la lista se pintaba con JavaScript;
+   desde 2026-08 la página (Next.js) trae los profesores en __NEXT_DATA__, así
+   que basta fetch. La app en sí no puede hacerlo (el sitio no envía cabeceras
+   CORS), de ahí que se cachee el resultado en un archivo que la app carga.
 
-   Requiere:  npm install puppeteer && npx puppeteer browsers install chrome
-   Uso:       node herramientas/sincronizar-profesores.js
+   Uso:       node herramientas/sincronizar-profesores.js --carrera=<slug>
               node herramientas/sincronizar-profesores.js --solo 2015570
    Trabaja de a una materia, con pausa entre ellas.
    ========================================================================== */
@@ -65,6 +63,34 @@ function leerProfesores() {
       resenas: +((txt.match(/(\d+)\s*Rese/i) || [])[1] || 0),
     };
   });
+}
+
+/**
+ * Profesores de una materia. La página es Next.js y trae en <script
+ * id="__NEXT_DATA__"> el estado de Apollo con los objetos Professor
+ * (nombre, slug, calidad y número de reseñas): basta un fetch, sin navegador.
+ */
+async function profesoresDeMateria(url) {
+  const r = await fetch(url, { headers: { 'user-agent': 'malla-unal/1.0' }, signal: AbortSignal.timeout(40000) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const html = await r.text();
+  const m = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
+  if (!m) throw new Error('la página no trae __NEXT_DATA__');
+  const j = JSON.parse(m[1]);
+  // El estado de Apollo puede colgar de distintos niveles según la versión del sitio.
+  const buscar = o => {
+    if (!o || typeof o !== 'object') return null;
+    if (o.initialApolloState) return o.initialApolloState;
+    for (const v of Object.values(o)) { const r2 = buscar(v); if (r2) return r2; }
+    return null;
+  };
+  const st = buscar(j) || {};
+  return Object.entries(st).filter(([k]) => k.startsWith('Professor:')).map(([, p]) => ({
+    nombre: `${p.firstname || ''} ${p.lastname || ''}`.replace(/\s+/g, ' ').trim(),
+    slug: p.slug,
+    nivel: p.quality || 'zero',
+    resenas: +(p.review_count || 0),
+  }));
 }
 
 /**
@@ -126,43 +152,28 @@ async function detalleProfesor(slug) {
   } else await recorrerMaterias();
 
   async function recorrerMaterias() {
-  let puppeteer;
-  try { puppeteer = require('puppeteer'); }
-  catch {
-    console.error('Falta puppeteer.\n  npm install puppeteer && npx puppeteer browsers install chrome');
-    process.exit(1);
-  }
-
-  console.log(`Consultando profesores de ${codigos.length} materias…\n`);
-  const navegador = await puppeteer.launch({ args: ['--no-sandbox', '--disable-dev-shm-usage'] });
-  const pagina = await navegador.newPage();
-  await pagina.setViewport({ width: 1440, height: 1000 });
-
-  for (let i = 0; i < codigos.length; i++) {
-    const cod = codigos[i];
-    const entrada = LOSESTUDIANTES[cod];
-    const pos = `[${String(i + 1).padStart(3)}/${codigos.length}]`;
-    try {
-      await pagina.goto(entrada.url, { waitUntil: 'networkidle0', timeout: 60000 });
-      await dormir(ESPERA_RENDER_MS);
-      const profes = await pagina.evaluate(leerProfesores);
-      // Se ordenan por número de reseñas: los más comentados primero.
-      profes.sort((a, b) => b.resenas - a.resenas || a.nombre.localeCompare(b.nombre));
-      entrada.profesores = profes.map(p => ({
-        nombre: p.nombre, slug: p.slug, resenas: p.resenas,
-        calidad: CALIDAD[p.nivel] || null,
-      }));
-      if (profes.length) conProfes++; else sinProfes++;
-      const top = profes.filter(p => p.resenas).slice(0, 3).map(p => `${p.nombre} (${p.resenas})`).join(', ');
-      console.log(`${pos} ${cod}  ${String(profes.length).padStart(2)} profesor(es)  ${entrada.nombre}${top ? `\n            ${top}` : ''}`);
-    } catch (e) {
-      fallos++;
-      console.log(`${pos} ${cod}  ⚠ ${e.message.split('\n')[0]}`);
+    console.log(`Consultando profesores de ${codigos.length} materias…\n`);
+    for (let i = 0; i < codigos.length; i++) {
+      const cod = codigos[i];
+      const entrada = LOSESTUDIANTES[cod];
+      const pos = `[${String(i + 1).padStart(3)}/${codigos.length}]`;
+      try {
+        const profes = await profesoresDeMateria(entrada.url);
+        // Se ordenan por número de reseñas: los más comentados primero.
+        profes.sort((a, b) => b.resenas - a.resenas || a.nombre.localeCompare(b.nombre));
+        entrada.profesores = profes.map(p => ({
+          nombre: p.nombre, slug: p.slug, resenas: p.resenas,
+          calidad: CALIDAD[p.nivel] || null,
+        }));
+        if (profes.length) conProfes++; else sinProfes++;
+        const top = profes.filter(p => p.resenas).slice(0, 3).map(p => `${p.nombre} (${p.resenas})`).join(', ');
+        console.log(`${pos} ${cod}  ${String(profes.length).padStart(2)} profesor(es)  ${entrada.nombre}${top ? `\n            ${top}` : ''}`);
+      } catch (e) {
+        fallos++;
+        console.log(`${pos} ${cod}  ⚠ ${e.message.split('\n')[0]}`);
+      }
+      if (i < codigos.length - 1) await dormir(PAUSA_MS);
     }
-    if (i < codigos.length - 1) await dormir(PAUSA_MS);
-  }
-
-  await navegador.close();
   }
 
   /* --- Segunda fase: calificación y nota promedio de cada profesor ---------

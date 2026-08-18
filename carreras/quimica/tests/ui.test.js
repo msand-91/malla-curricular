@@ -18,7 +18,7 @@ const src = fs.readFileSync(cdir + '/carrera.js', 'utf8') + '\n'
   + fs.readFileSync(cdir + '/sia.js', 'utf8') + '\n'
   + fs.readFileSync(cdir + '/electivas.js', 'utf8') + '\n'
   + fs.readFileSync(cdir + '/oferta.js', 'utf8') + '\n'
-  + fs.readFileSync(cdir + '/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
+  + fs.readFileSync(cdir + '/datos.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/temas.js', 'utf8') + '\n' + fs.readFileSync(dir + '/js/app.js', 'utf8');
 w.eval(src + '\n;window.__api = { get S(){return S}, get PLAN(){return PLAN},'
   + ' get PLAN_POR_ID(){return PLAN_POR_ID}, CATALOGO, guardar, refrescar, construirPlan,'
   + ' moverAsignatura, abrirEditor, OFERTA_MAP };');
@@ -37,6 +37,8 @@ chk($('#resumenComponentes').textContent.includes('158') === false || true, 'com
 chk($$('#notasCont details').length > 0, `${$$('#notasCont details').length} notas de inconsistencia`);
 chk($('#progGlobal').style.width === '0%', 'barra global en 0% sin avance');
 
+chk($('.logo svg') !== null, 'el logo es el icono SVG de la carrera');
+chk(w.document.documentElement.style.getPropertyValue('--acento') !== '', 'el color de acento de la carrera está aplicado');
 console.log('\n[B] Estado inicial de disponibilidad');
 const disp = $$('#malla .card.disponible').length, bloq = $$('#malla .card.bloqueada').length;
 console.log(`  disponibles=${disp}  bloqueadas=${bloq}`);

@@ -249,6 +249,147 @@ const GRUPOS_CATALOGO = {
 const GRUPOS_DISCIPLINARES = ['software', 'infraestructura', 'inteligentes', 'modelos', 'hardware', 'gestion'];
 
 /* ============================================================================
+   ÉNFASIS / RUTAS CURRICULARES SUGERIDAS (PEP, plan 2879, 2014)
+   ----------------------------------------------------------------------------
+   Ninguna es obligatoria. Cada ruta propone asignaturas para llenar los cupos
+   de libre elección (y sustituir casillas «con opciones»). Los nombres se
+   verificaron por código en losestudiantes.com; los marcados porConfirmar se
+   tomaron del texto del PEP y conviene confirmarlos en el SIA. Muchas no
+   aparecen hoy en el plan 2A74 del SIA: la app indica si están en la oferta.
+   ========================================================================== */
+const RUTAS = [
+  { id: 'ISW', nombre: 'Ingeniería de Software', descripcion: 'Desarrollo y arquitectura de software: bases de datos avanzadas, patrones, aplicaciones móviles, minería de datos.',
+    asignaturas: [
+      { cod: '2019765', nombre: 'Bases de datos avanzadas', porConfirmar: true },
+      { cod: '2019762', nombre: 'Algoritmia avanzada', porConfirmar: true },
+      { cod: '2019772', nombre: 'Temas avanzados en ingeniería de software I', porConfirmar: true },
+      { cod: '2019795', nombre: 'Ingeniería de software avanzada', porConfirmar: true },
+      { cod: '2016732', nombre: 'Patrones de software', porConfirmar: true },
+      { cod: '2019773', nombre: 'Mineria De Datos' },
+      { cod: '2026213', nombre: 'Desarrollo de aplicaciones móviles', porConfirmar: true },
+    ] },
+  { id: 'SINT', nombre: 'Sistemas Inteligentes', descripcion: 'Aprendizaje de máquina, recuperación de información, lingüística computacional, neurociencia computacional.',
+    asignaturas: [
+      { cod: '2019818', nombre: 'Sistemas Inteligentes' },
+      { cod: '2026442', nombre: 'Lingüística computacional', porConfirmar: true },
+      { cod: '2019779', nombre: 'Recuperación de información', porConfirmar: true },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+      { cod: '2026484', nombre: 'Computational neuroscience', porConfirmar: true },
+      { cod: '2012033', nombre: 'Aprendizaje de máquina', porConfirmar: true },
+    ] },
+  { id: 'TELECOM', nombre: 'Telecomunicaciones', descripcion: 'Señales, campos electromagnéticos, líneas y antenas, comunicaciones ópticas y negocios en telecomunicaciones.',
+    asignaturas: [
+      { cod: '2016487', nombre: 'Campos Electromagneticos' },
+      { cod: '2016503', nombre: 'Lineas Y Antenas' },
+      { cod: '2025783', nombre: 'Optoelectrónica y comunicaciones ópticas', porConfirmar: true },
+      { cod: '2023708', nombre: 'Ingenieria De Nuevos Negocios En Telecomunicaciones' },
+      { cod: '1000007', nombre: 'Ecuaciones Diferenciales' },
+      { cod: '2016506', nombre: 'Señales Y Sistemas I' },
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+    ] },
+  { id: 'BIOINF', nombre: 'Bioinformática y Computación Bioinspirada', descripcion: 'Bioinformática, vida artificial, aprendizaje de máquina y estadística aplicada sobre una base de biología general.',
+    asignaturas: [
+      { cod: '1000009', nombre: 'Biologia General' },
+      { cod: '2016839', nombre: 'Bioinformática', porConfirmar: true },
+      { cod: '2012033', nombre: 'Aprendizaje de máquina', porConfirmar: true },
+      { cod: '2019779', nombre: 'Recuperación de información', porConfirmar: true },
+      { cod: '2025439', nombre: 'Programacion Y Algoritmos En Bioinformatica' },
+      { cod: '2012046', nombre: 'Vida artificial', porConfirmar: true },
+      { cod: '2020933', nombre: 'Metodos Estadisticos Aplicados' },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+    ] },
+  { id: 'BIOMED', nombre: 'Ingeniería Biomédica', descripcion: 'Señales y sistemas, circuitos, procesamiento de imágenes y fundamentos de ingeniería biomédica.',
+    asignaturas: [
+      { cod: '1000009', nombre: 'Biologia General' },
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+      { cod: '1000007', nombre: 'Ecuaciones Diferenciales' },
+      { cod: '2016506', nombre: 'Señales Y Sistemas I' },
+      { cod: '2016765', nombre: 'Fundamentos de ingeniería biomédica', porConfirmar: true },
+      { cod: '2015159', nombre: 'Variable Compleja' },
+      { cod: '2016507', nombre: 'Señales Y Sistemas Ii' },
+      { cod: '2023644', nombre: 'Procesamiento de imágenes', porConfirmar: true },
+    ] },
+  { id: 'HW', nombre: 'Hardware', descripcion: 'Circuitos, electrónica análoga y digital, sistemas embebidos y verificación de sistemas digitales.',
+    asignaturas: [
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+      { cod: '2016495', nombre: 'Electronica Analoga I' },
+      { cod: '2001880', nombre: 'Tecnología digital', porConfirmar: true },
+      { cod: '2016499', nombre: 'Electronica Digital Ii' },
+      { cod: '2016512', nombre: 'Verificacion De Sistemas Digitales' },
+      { cod: '2016505', nombre: 'Sistemas embebidos', porConfirmar: true },
+    ] },
+  { id: 'CIENCOMP', nombre: 'Ciencias de la Computación', descripcion: 'Matemáticas para computación: lógica, conjuntos, combinatoria, grafos, álgebra abstracta, análisis real y numérico.',
+    asignaturas: [
+      { cod: '2026519', nombre: 'Ecuaciones en diferencias y sistemas dinámicos', porConfirmar: true },
+      { cod: '2026555', nombre: 'Álgegra Abstracta y Computacional' },
+      { cod: '2015155', nombre: 'Introduccion Al Analisis Real' },
+      { cod: '2015150', nombre: 'Analisis Numerico' },
+      { cod: '2015156', nombre: 'Logica Matematica' },
+      { cod: '2025819', nombre: 'Introduccion A La Teoria De Conjuntos' },
+      { cod: '2026548', nombre: 'Introducción al análisis combinatorio', porConfirmar: true },
+      { cod: '2015184', nombre: 'Teoría de Grafos' },
+      { cod: '2015177', nombre: 'Modelos matemáticos', porConfirmar: true },
+    ] },
+  { id: 'MODOPTSIM', nombre: 'Modelos, Optimización y Simulación', descripcion: 'Modelos matemáticos, optimización, simulación de procesos, logística, costos y economía.',
+    asignaturas: [
+      { cod: '2016592', nombre: 'Economia General' },
+      { cod: '2016610', nombre: 'Sistemas De Costos' },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+      { cod: '2007975', nombre: 'Análisis real', porConfirmar: true },
+      { cod: '2015150', nombre: 'Analisis Numerico' },
+      { cod: '2025987', nombre: 'Modelos Estocasticos Para Procesos De Manufactura Y Sistemas De Servicios' },
+      { cod: '2016605', nombre: 'Logistica' },
+      { cod: '2025988', nombre: 'Taller De Simulacion Procesos De Manufactura Y Sistemas De Servicios' },
+      { cod: '2015177', nombre: 'Modelos matemáticos', porConfirmar: true },
+    ] },
+  { id: 'VISIOROBOT', nombre: 'Visión y Robótica', descripcion: 'Señales, electrónica, variable compleja y robótica para visión artificial y robótica.',
+    asignaturas: [
+      { cod: '2015159', nombre: 'Variable Compleja' },
+      { cod: '2016507', nombre: 'Señales Y Sistemas Ii' },
+      { cod: '2016770', nombre: 'Robotica' },
+      { cod: '1000007', nombre: 'Ecuaciones Diferenciales' },
+      { cod: '2016506', nombre: 'Señales Y Sistemas I' },
+      { cod: '2016509', nombre: 'Taller De Ingenieria Electronica' },
+      { cod: '2016489', nombre: 'Circuitos Electricos I' },
+      { cod: '2016495', nombre: 'Electronica Analoga I' },
+    ] },
+  { id: 'CREDIGMEDANIM', nombre: 'Medios Digitales y Animación', descripcion: 'Medios digitales, videojuegos, animación y fundamentos tecnológicos del diseño (con la Facultad de Artes).',
+    asignaturas: [
+      { cod: '2016093', nombre: 'Taller De Enfasis En Animacion Y Narrativas Audiovisuales I' },
+      { cod: '2026511', nombre: 'Desarrollo De Videojuegos' },
+      { cod: '2016749', nombre: 'Introduction to data science and data visualization', porConfirmar: true },
+      { cod: '2016083', nombre: 'Produccion En Medios Digitales' },
+      { cod: '2016091', nombre: 'Taller De Enfasis En Multimedia E Imagen Digital I' },
+      { cod: '2016070', nombre: 'Fundamentos Tecnologicos: Formatos Y Medidas' },
+      { cod: '2016071', nombre: 'Fundamentos Tecnologicos: Tipometria' },
+      { cod: '2016069', nombre: 'Fundamentos Tecnologicos: Color Y Produccion' },
+    ] },
+  { id: 'DATASCI', nombre: 'Ciencia de Datos', descripcion: 'Ciencia de datos: aprendizaje de máquina, minería de datos, inferencia y regresión, bases de datos avanzadas.',
+    asignaturas: [
+      { cod: '2019779', nombre: 'Recuperación de información', porConfirmar: true },
+      { cod: '2012033', nombre: 'Aprendizaje de máquina', porConfirmar: true },
+      { cod: '2016749', nombre: 'Introduction to data science and data visualization', porConfirmar: true },
+      { cod: '2016360', nombre: 'Analisis De Regresion' },
+      { cod: '2016379', nombre: 'Inferencia Estadistica' },
+      { cod: '2019773', nombre: 'Mineria De Datos' },
+      { cod: '2019765', nombre: 'Bases de datos avanzadas', porConfirmar: true },
+    ] },
+  { id: 'TIC', nombre: 'TIC y Gobierno Electrónico', descripcion: 'Gestión de TIC y gobierno electrónico: gestión de TI, geomática, calidad de servicio y gerencia de proyectos públicos.',
+    asignaturas: [
+      { cod: '2026538', nombre: 'Taller Aplicado Al Gobierno Electronico' },
+      { cod: '2026502', nombre: 'Gestion De Las Tecnologias De Informacion' },
+      { cod: '2011263', nombre: 'Geomática', porConfirmar: true },
+      { cod: '2026537', nombre: 'La Calidad De Servicio En El Gobierno Electronico' },
+      { cod: '2026231', nombre: 'Tecnologias De Informacion Y Gobierno Electronico' },
+      { cod: '2026440', nombre: 'Gerencia De Proyectos Aplicado Al Gobierno Electronico' },
+      { cod: '2026208', nombre: 'Introduccion Al Gobierno Electronico' },
+    ] },
+];
+
+/* ============================================================================
    Notas sobre los datos y sus fuentes
    ========================================================================== */
 const INCONSISTENCIAS = [

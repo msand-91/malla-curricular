@@ -7,7 +7,7 @@ const CARRERA = {
   nombre: 'Química',
   titulo: 'Malla Curricular · Pregrado en Química',
   subtitulo: 'Universidad Nacional de Colombia · Sede Bogotá · 158 créditos',
-  logo: '⚗',
+  tema: 'quimica',        // color, icono y fondo (js/temas.js)
   slug: 'quimica',
   plan: '2519',
   sede: /1101 SEDE BOGOT/,

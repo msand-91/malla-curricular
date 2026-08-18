@@ -27,6 +27,18 @@ for (const { slug, c } of carreras) {
   console.log(`  ${slug}/index.html  ← ${c.titulo}`);
 }
 
+// Temas (color, icono, patrón) para pintar la portada con la identidad de cada carrera.
+const vm = require('vm');
+const ctxT = {}; vm.createContext(ctxT);
+vm.runInContext(fs.readFileSync(path.join(RAIZ, 'js/temas.js'), 'utf8') + ';this.TEMAS = TEMAS; this.temaDe = temaDe; this.fondoTema = fondoTema;', ctxT);
+const conTema = carreras.map(x => ({ ...x, t: ctxT.temaDe(x.c) }));
+const tarjeta = ({ slug, c, t }, i) => `    <a class="carrera" href="${slug}/" style="--c:${t.acento};--c2:${t.acento2};--fondo:${ctxT.fondoTema(t, 0.16).replace(/"/g, '&quot;')}">
+      <span class="ico">${t.icono}</span>
+      <b>${esc(c.nombre)}</b>
+      <small>${esc((c.subtitulo || '').replace(/^Universidad Nacional de Colombia · Sede Bogotá · ?/, ''))}</small>
+      <span class="ir">Abrir <span aria-hidden="true">→</span></span>
+    </a>`;
+
 const portada = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -35,26 +47,44 @@ const portada = `<!DOCTYPE html>
 <title>Mallas curriculares · UNAL Bogotá</title>
 <link rel="stylesheet" href="css/estilos.css">
 <style>
-  .portada { max-width: 760px; margin: 40px auto; padding: 0 16px; }
-  .portada h1 { font-size: 26px; margin: 0 0 6px; }
-  .portada p.sub { color: var(--texto-2); margin: 0 0 22px; }
-  .carreras { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-  .carreras a { display: block; background: var(--panel); border: 1px solid var(--borde); border-radius: var(--r); padding: 18px 16px; text-decoration: none; color: var(--texto); box-shadow: var(--sombra); transition: transform .12s, border-color .12s; }
-  .carreras a:hover { transform: translateY(-2px); border-color: var(--disp); }
-  .carreras .logo { font-size: 30px; margin-bottom: 8px; }
-  .carreras b { display: block; font-size: 15px; margin-bottom: 4px; }
-  .carreras small { color: var(--texto-2); font-size: 12.5px; }
-  .portada .nota { margin-top: 26px; font-size: 12.5px; color: var(--texto-2); }
+  body { min-height: 100vh; background:
+      radial-gradient(900px 500px at 8% -10%, color-mix(in srgb, #0f9aa8 22%, transparent), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, color-mix(in srgb, #5b6cf5 22%, transparent), transparent 60%),
+      radial-gradient(700px 500px at 50% 110%, color-mix(in srgb, #2f9e5b 18%, transparent), transparent 60%),
+      var(--bg); }
+  .portada { max-width: 980px; margin: 0 auto; padding: 56px 20px 40px; }
+  .portada .marca { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--texto-2); margin-bottom: 14px; }
+  .portada .marca i { width: 26px; height: 2px; background: linear-gradient(90deg, #0f9aa8, #2f9e5b, #5b6cf5); display: inline-block; border-radius: 2px; }
+  .portada h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 12px; }
+  .portada h1 span { background: linear-gradient(90deg, #0f9aa8, #2f9e5b 50%, #5b6cf5); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .portada p.sub { color: var(--texto-2); margin: 0 0 30px; max-width: 640px; font-size: 15.5px; }
+  .carreras { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .carrera { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; min-height: 190px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 16px; padding: 22px 20px 18px; text-decoration: none; color: var(--texto);
+    box-shadow: var(--sombra); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+  .carrera::before { content: ""; position: absolute; inset: 0; background-image: var(--fondo); background-size: auto; opacity: .9; pointer-events: none;
+    mask-image: linear-gradient(160deg, rgba(0,0,0,.9), transparent 70%); -webkit-mask-image: linear-gradient(160deg, rgba(0,0,0,.9), transparent 70%); }
+  .carrera::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--c), var(--c2)); }
+  .carrera:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 10px 28px color-mix(in srgb, var(--c) 28%, transparent); }
+  .carrera .ico { position: relative; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; color: #fff; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--c), var(--c2)); box-shadow: 0 6px 16px color-mix(in srgb, var(--c) 40%, transparent); }
+  .carrera .ico svg { width: 26px; height: 26px; }
+  .carrera b { position: relative; font-size: 17px; letter-spacing: -.01em; }
+  .carrera small { position: relative; color: var(--texto-2); font-size: 12.5px; line-height: 1.4; }
+  .carrera .ir { position: relative; margin-top: auto; padding-top: 10px; font-size: 13px; font-weight: 650; color: var(--c); }
+  .portada .nota { margin-top: 28px; font-size: 12.5px; color: var(--texto-2); max-width: 640px; }
+  .portada .nota a { color: var(--texto-2); }
 </style>
 </head>
 <body>
 <main class="portada">
-  <h1>Mallas curriculares interactivas</h1>
-  <p class="sub">Universidad Nacional de Colombia · Sede Bogotá. Elige tu carrera: marca lo aprobado, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
+  <div class="marca"><i></i> Universidad Nacional de Colombia · Sede Bogotá</div>
+  <h1>Mallas curriculares <span>interactivas</span></h1>
+  <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
   <div class="carreras">
-${carreras.map(({ slug, c }) => `    <a href="${slug}/"><div class="logo">${esc(c.logo || '🎓')}</div><b>${esc(c.nombre)}</b><small>${esc((c.subtitulo || '').replace(/^Universidad Nacional de Colombia · Sede Bogotá · ?/, ''))} · plan ${esc(c.plan)}</small></a>`).join('\n')}
+${conTema.map(tarjeta).join('\n')}
   </div>
-  <p class="nota">El avance se guarda en tu navegador, por carrera. Datos del SIA (acceso público, sin sesión); confirma siempre en el SIA antes de inscribir.</p>
+  <p class="nota">El avance se guarda en tu navegador, por carrera. Datos públicos del SIA, sin sesión ni credenciales; confirma siempre en el SIA antes de inscribir.</p>
 </main>
 </body>
 </html>
