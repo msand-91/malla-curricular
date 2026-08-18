@@ -53,11 +53,14 @@ const portada = `<!DOCTYPE html>
       radial-gradient(700px 500px at 50% 110%, color-mix(in srgb, #2f9e5b 18%, transparent), transparent 60%),
       var(--bg); }
   .portada { max-width: 980px; margin: 0 auto; padding: 56px 20px 40px; }
-  .portada .marca { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--texto-2); margin-bottom: 14px; }
+  /* Cabecera centrada y sobria: el color va en las tarjetas, no en el título. */
+  .portada .encabezado { text-align: center; margin-bottom: 34px; }
+  .portada .marca { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--texto-2); margin-bottom: 16px; }
   .portada .marca i { width: 26px; height: 2px; background: linear-gradient(90deg, #0f9aa8, #2f9e5b, #5b6cf5); display: inline-block; border-radius: 2px; }
-  .portada h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 12px; }
-  .portada h1 span { background: linear-gradient(90deg, #0f9aa8, #2f9e5b 50%, #5b6cf5); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .portada p.sub { color: var(--texto-2); margin: 0 0 30px; max-width: 640px; font-size: 15.5px; }
+  .portada h1 { font-size: clamp(34px, 5.4vw, 56px); line-height: 1.04; letter-spacing: -.03em; font-weight: 750; margin: 0 auto 8px; max-width: 15ch; }
+  .portada h1 span { font-weight: 400; }                     /* el contraste lo da el peso, no el color */
+  .portada .filete { width: 64px; height: 3px; margin: 0 auto 18px; border-radius: 3px; background: linear-gradient(90deg, #0f9aa8, #2f9e5b 50%, #5b6cf5); }
+  .portada p.sub { color: var(--texto-2); margin: 0 auto; max-width: 60ch; font-size: 15.5px; text-wrap: balance; }
   .carreras { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
   .carrera { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; min-height: 190px;
     background: var(--panel); border: 1px solid var(--borde); border-radius: 16px; padding: 22px 20px 18px; text-decoration: none; color: var(--texto);
@@ -85,9 +88,12 @@ const portada = `<!DOCTYPE html>
 </head>
 <body>
 <main class="portada">
-  <div class="marca"><i></i> Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
-  <h1>Mallas curriculares <span>interactivas</span></h1>
-  <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
+  <header class="encabezado">
+    <div class="marca"><i></i> Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
+    <h1>Mallas curriculares <span>interactivas</span></h1>
+    <div class="filete"></div>
+    <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
+  </header>
   <div class="carreras">
 ${conTema.map(tarjeta).join('\n')}
   </div>
