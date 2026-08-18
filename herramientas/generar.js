@@ -55,8 +55,7 @@ const portada = `<!DOCTYPE html>
   .portada { max-width: 980px; margin: 0 auto; padding: 56px 20px 40px; }
   /* Cabecera centrada y sobria: el color va en las tarjetas, no en el título. */
   .portada .encabezado { text-align: center; margin-bottom: 34px; }
-  .portada .marca { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--texto-2); margin-bottom: 16px; }
-  .portada .marca i { width: 26px; height: 2px; background: linear-gradient(90deg, #0f9aa8, #2f9e5b, #5b6cf5); display: inline-block; border-radius: 2px; }
+  .portada .marca { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--texto-2); margin-bottom: 16px; }
   .portada h1 { font-size: clamp(34px, 5.4vw, 56px); line-height: 1.04; letter-spacing: -.03em; font-weight: 750; margin: 0 auto 8px; max-width: 15ch; }
   .portada h1 span { font-weight: 400; }                     /* el contraste lo da el peso, no el color */
   .portada .filete { width: 64px; height: 3px; margin: 0 auto 18px; border-radius: 3px; background: linear-gradient(90deg, #0f9aa8, #2f9e5b 50%, #5b6cf5); }
@@ -75,21 +74,21 @@ const portada = `<!DOCTYPE html>
   .carrera b { position: relative; font-size: 17px; letter-spacing: -.01em; }
   .carrera small { position: relative; color: var(--texto-2); font-size: 12.5px; line-height: 1.4; }
   .carrera .ir { position: relative; margin-top: auto; padding-top: 10px; font-size: 13px; font-weight: 650; color: var(--c); }
-  .portada .nota { margin-top: 28px; font-size: 12.5px; color: var(--texto-2); max-width: 640px; }
+  .portada .nota { margin: 28px auto 0; font-size: 12.5px; color: var(--texto-2); max-width: 62ch; text-align: center; }
   .portada .nota a { color: var(--texto-2); }
-  .contacto { margin-top: 26px; display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 12px 16px; font-size: 13.5px; box-shadow: var(--sombra); max-width: 640px; }
+  .contacto { margin: 22px auto 0; display: flex; align-items: center; justify-content: center; gap: 14px; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 14px 18px; font-size: 13.5px; box-shadow: var(--sombra); max-width: 640px; text-align: center; }
   .contacto img { border-radius: 12px; background: #fbfaf6; padding: 3px; flex: none; }
   .contacto > div { line-height: 1.55; }
   .contacto b { display: block; margin-bottom: 2px; }
   .contacto a { color: var(--acento, #2563c4); font-weight: 600; text-decoration: none; }
   .contacto a:hover { text-decoration: underline; }
-  @media (max-width: 560px) { .contacto { align-items: flex-start; } }
+  @media (max-width: 560px) { .contacto { flex-direction: column; gap: 10px; } }
 </style>
 </head>
 <body>
 <main class="portada">
   <header class="encabezado">
-    <div class="marca"><i></i> Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
+    <div class="marca">Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
     <h1>Mallas curriculares <span>interactivas</span></h1>
     <div class="filete"></div>
     <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
