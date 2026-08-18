@@ -613,6 +613,7 @@ nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
 .cargando { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 46px 16px; color: var(--texto-2); font-size: 13.5px; }
 .cargando .giro { width: 16px; height: 16px; border: 2px solid var(--borde); border-top-color: var(--acento); border-radius: 50%; animation: giro .7s linear infinite; }
 @keyframes giro { to { transform: rotate(360deg); } }
+.campo .cargando { padding: 10px 0; justify-content: flex-start; font-size: 12.5px; }
 
 </style>
 
@@ -52888,6 +52889,7 @@ const horaTexto = s => `${s.diaTexto.slice(0, 1) + s.diaTexto.slice(1, 3).toLowe
 
 /** Bloque «Oferta del semestre» de la ficha de una asignatura. */
 function panelOferta(cod) {
+  if (!DATOS_PESADOS.oferta()) return `<div class="campo"><label>Oferta del semestre en el SIA</label>${cargando('Cargando los grupos y horarios…')}</div>`;
   const o = ofertaDe(cod);
   if (!o) return '';
   const n = gruposDe(o);
@@ -53196,11 +53198,14 @@ function abrirDetalle(id) {
       ${(() => {
         const cod = a.cod || (S.ranuras[id] && S.ranuras[id].cod);
         if (!cod) return '';
+        if (!DATOS_PESADOS.losestudiantes()) return `<div class="campo"><label>Profesores</label>
+          ${cargando('Cargando profesores y reseñas…')}</div>`;
         if (!LE[cod]) return `<div class="campo"><label>Profesores</label>
           <div style="font-size:12.5px;color:var(--texto-2)">Esta asignatura no está registrada en losestudiantes.com con el código ${esc(cod)}.</div></div>`;
         return panelProfesores(cod);
       })()}
       ${(() => {
+        if (!DATOS_PESADOS.sia()) return `<div class="campo"><label>Ficha del SIA</label>${cargando('Cargando la ficha…')}</div>`;
         const f = fichaDe(a);
         if (!f) return '';
         const cr = f.creditos != null && f.creditos !== creditos(a)

@@ -80,10 +80,22 @@ async function probar(slug) {
   $$('#malla .card')[0].dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
   await microtareas();
   chk($('#detalle').open, 'la ficha de una asignatura se abre');
+  chk(!$('#detalle').textContent.includes('no está registrada'),
+      'y no dice «no está registrada» cuando los datos ya llegaron');
   $('#detalle').close();
 
+  /* Con los datos aún sin llegar, la ficha debe decir «Cargando», no «no está registrada». */
+  const antes = { l: w.LOSESTUDIANTES, s: w.SIA, o: w.OFERTA };
+  w.eval('window.LOSESTUDIANTES = undefined; window.SIA = undefined; window.OFERTA = undefined;');
+  $$('#malla .card')[0].dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  const txt = $('#detalle').textContent;
+  chk(txt.includes('Cargando') && !txt.includes('no está registrada'),
+      'mientras cargan, la ficha muestra «Cargando…» en vez de «no está registrada»');
+  $('#detalle').close();
+  w.LOSESTUDIANTES = antes.l; w.SIA = antes.s; w.OFERTA = antes.o;
+
   chk(new Set(pedidos).size === pedidos.length, `cada archivo se pide una sola vez (${pedidos.join(', ')})`);
-  dom.window.close();
+  await microtareas();   // deja terminar las recargas pendientes antes de pasar a la siguiente carrera
 }
 
 (async () => {
