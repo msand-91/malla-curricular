@@ -23,5 +23,15 @@ for (const slug of carreras) {
     if (r.status !== 0) fallos++;
   }
 }
+/* Prueba transversal: la carga diferida de los datos pesados. */
+console.log('\n== carga diferida (todas las carreras)');
+{
+  const r = spawnSync(process.execPath, [path.join(__dirname, 'carga.test.js'), ...(pedido ? ['--carrera=' + pedido] : [])],
+    { stdio: ['ignore', 'pipe', 'inherit'] });
+  const out = r.stdout.toString().trim().split('\n');
+  console.log(out.filter(l => /FALLA|✗|✓/.test(l)).join('\n') || out.slice(-1)[0]);
+  if (r.status !== 0) fallos++;
+}
+
 console.log(fallos ? `\n✗ ${fallos} archivo(s) de pruebas con fallas` : '\n✓ Todas las pruebas de todas las carreras pasan');
 process.exit(fallos ? 1 : 0);

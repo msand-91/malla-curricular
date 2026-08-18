@@ -49,7 +49,13 @@ if (!cuerpo) { console.error('No se pudo extraer el <body> de index.html'); proc
 
 /* --- Hojas de estilo y scripts, en el mismo orden que el index -------------- */
 const hojas = [...html.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map(m => m[1]);
+/* En la página, los datos pesados se cargan bajo demanda; en el paquete van
+   todos incrustados, en el orden que espera la app (datos antes que app.js). */
 const scripts = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]);
+const pesados = ['losestudiantes', 'sia', 'electivas', 'oferta']
+  .map(n => `../carreras/${SLUG}/${n}.js`)
+  .filter(f => fs.existsSync(path.join(RAIZ, SLUG, f)));
+scripts.splice(Math.max(1, scripts.findIndex(f => f.endsWith('/datos.js'))), 0, ...pesados);
 
 if (!hojas.length || !scripts.length) {
   console.error('No se encontraron hojas de estilo o scripts en index.html'); process.exit(1);

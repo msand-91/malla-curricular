@@ -609,6 +609,11 @@ nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
 .pie-app a { color: var(--acento); text-decoration: none; font-weight: 600; }
 .pie-app a:hover { text-decoration: underline; }
 
+/* ------------------------------------------------- carga de datos --------- */
+.cargando { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 46px 16px; color: var(--texto-2); font-size: 13.5px; }
+.cargando .giro { width: 16px; height: 16px; border: 2px solid var(--borde); border-top-color: var(--acento); border-radius: 50%; animation: giro .7s linear infinite; }
+@keyframes giro { to { transform: rotate(360deg); } }
+
 </style>
 
 <header class="top">
@@ -804,6 +809,9 @@ nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
 </footer>
 
 <dialog class="detalle" id="detalle"></dialog>
+
+<!-- Solo lo imprescindible para pintar la malla; la oferta del SIA, los
+     profesores, las fichas y las electivas (varios MB) se cargan al usarlas. -->
 
 <script>
 /* ===== ../carreras/sistemas/carrera.js ===== */
@@ -61627,7 +61635,19 @@ function aplicarTemaCarrera(carrera) {
 const CARRERA_APP = typeof CARRERA === 'object' ? CARRERA : {};
 const CLAVE_LS = CARRERA_APP.claveLS || 'mallaQuimicaUNAL.v1';
 const NOMBRE_CARRERA = CARRERA_APP.nombre || 'Química';
-const ROMANOS = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+/* Número romano de un semestre. Hay planes de más de diez (Veterinaria llega
+   a XII), así que se calcula en vez de listarlo. */
+function romano(n) {
+  n = +n;
+  if (!Number.isInteger(n) || n < 1 || n > 3999) return String(n ?? '');
+  const tabla = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'],
+                 [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+  let out = '';
+  for (const [v, r] of tabla) while (n >= v) { out += r; n -= v; }
+  return out;
+}
+/* Compatibilidad: ROMANOS[n] sigue funcionando en cualquier índice. */
+const ROMANOS = new Proxy({}, { get: (_, k) => (k === Symbol.toPrimitive || typeof k === 'symbol') ? undefined : romano(k) });
 
 /* ------------------------------------------------------------------ estado */
 const porDefecto = () => ({
@@ -62042,7 +62062,10 @@ function tarjeta(a, e, rel, ed) {
    datos desde el navegador. Lo que sí se puede es enlazar a la página de cada
    materia, donde están sus profesores y las reseñas. El índice código → URL lo
    genera herramientas/verificar-losestudiantes.js.                            */
-const LE = typeof LOSESTUDIANTES === 'object' ? LOSESTUDIANTES : {};
+const LE = new Proxy({}, { get: (_, k) => (typeof LOSESTUDIANTES === 'object' ? LOSESTUDIANTES : {})[k],
+  has: (_, k) => k in (typeof LOSESTUDIANTES === 'object' ? LOSESTUDIANTES : {}),
+  ownKeys: () => Reflect.ownKeys(typeof LOSESTUDIANTES === 'object' ? LOSESTUDIANTES : {}),
+  getOwnPropertyDescriptor: (_, k) => Object.getOwnPropertyDescriptor(typeof LOSESTUDIANTES === 'object' ? LOSESTUDIANTES : {}, k) });
 
 function enlaceLE(cod, texto) {
   const e = cod && LE[cod];
@@ -62055,8 +62078,8 @@ function enlaceLE(cod, texto) {
 /* Ficha oficial del catálogo público de asignaturas. Se genera con
    herramientas/sia.js y aporta lo que los PDF no traen: créditos reales de las
    optativas, descripción y temario.                                          */
-const FICHAS = typeof SIA === 'object' ? SIA : {};
-const fichaSIA = (cod, nombre) => FICHAS[cod + '|' + nombre] || null;
+const FICHAS = { get: k => (typeof SIA === 'object' ? SIA : {})[k] };
+const fichaSIA = (cod, nombre) => FICHAS.get(cod + '|' + nombre) || null;
 
 /** Ficha del SIA correspondiente a una asignatura del plan (o a su optativa). */
 function fichaDe(a) {
@@ -62067,8 +62090,11 @@ function fichaDe(a) {
 
 /* Oferta del semestre (grupos, horarios, cupos), del Catálogo de asignaturas
    del SIA. Se genera con herramientas/catalogo-sia.js.                      */
-const OFERTA_MAP = typeof OFERTA === 'object' ? OFERTA : {};
-const OFERTA_SEM = typeof OFERTA_PERIODO === 'string' ? OFERTA_PERIODO : '';
+const ofertaTodo = () => (typeof OFERTA === 'object' ? OFERTA : {});
+const OFERTA_MAP = new Proxy({}, { get: (_, k) => ofertaTodo()[k], has: (_, k) => k in ofertaTodo(),
+  ownKeys: () => Reflect.ownKeys(ofertaTodo()),
+  getOwnPropertyDescriptor: (_, k) => Object.getOwnPropertyDescriptor(ofertaTodo(), k) });
+const semestreOferta = () => (typeof OFERTA_PERIODO === 'string' ? OFERTA_PERIODO : '');
 const codBase = c => String(c || '').split('-')[0].trim();
 const ofertaDe = cod => OFERTA_MAP[codBase(cod)] || null;
 /** Código con el que una asignatura del plan aparece en el SIA (el suyo o el de su optativa). */
@@ -62088,7 +62114,7 @@ function panelOferta(cod) {
         ${act.grupos.map(g => `<div class="g"><b>${esc(g.grupo)}</b>${g.profesores.length ? ` — ${esc(g.profesores.join(', '))}` : ''}
           <span class="meta"> · ${g.cupos} cupo${g.cupos === 1 ? '' : 's'}${g.jornada && g.jornada !== 'DIURNO' ? ' · ' + esc(g.jornada.toLowerCase()) : ''}</span>
           <div class="meta">${g.sesiones.length ? g.sesiones.map(x => esc(horaTexto(x)) + (x.salon ? ' · ' + esc(x.salon) : '')).join(' · ') : 'Horario no informado'}</div></div>`).join('')}`).join('');
-  return `<div class="campo"><label>Oferta ${esc(OFERTA_SEM)} en el SIA${n ? ` · ${n} grupo${n === 1 ? '' : 's'}` : ''}</label>
+  return `<div class="campo"><label>Oferta ${esc(semestreOferta())} en el SIA${n ? ` · ${n} grupo${n === 1 ? '' : 's'}` : ''}</label>
     <div class="ficha-oferta">${cuerpo}</div>
     <div style="font-size:11.5px;color:var(--texto-2);margin-top:4px">Consultado el ${esc(typeof OFERTA_CONSULTADO === 'string' ? OFERTA_CONSULTADO : '')}. <a href="#" data-ir="vHorario">Armar horario →</a></div>
   </div>`;
@@ -62275,6 +62301,16 @@ function avisar(txt) {
 function abrirDetalle(id) {
   const a = PLAN_POR_ID[id];
   if (!a) return;
+  /* La ficha muestra profesores, contenido del SIA y los grupos del semestre.
+     Si esos datos aún no están, se abre igual y se repinta al llegar. */
+  const faltan = ['losestudiantes', 'sia', 'oferta'].filter(n => !DATOS_PESADOS[n]());
+  if (faltan.length && !abrirDetalle._esperando) {
+    abrirDetalle._esperando = true;
+    asegurarDatos(faltan, () => {
+      abrirDetalle._esperando = false;
+      if ($('#detalle').open && $('#detalle').dataset.id === id) abrirDetalle(id);
+    });
+  }
   const hechas = setAprobadas();
   const ev = evaluar(a, hechas);
   const disp = calcularDisponibilidad()[id];
@@ -62317,7 +62353,7 @@ function abrirDetalle(id) {
         ? `<optgroup label="${esc(titulo)}">${lista.map(x =>
             `<option value="${esc(x.cod)}|${esc(x.nombre)}" ${asig.cod === x.cod && asig.nombre === x.nombre ? 'selected' : ''}>${esc(x.nombre)}${x.cr != null ? ` — ${x.cr} cr` : ''}</option>`).join('')}</optgroup>`
         : '';
-      const ele = LISTA_ELECTIVAS.filter(e => e.vigente !== false)
+      const ele = electivasTodo().filter(e => e.vigente !== false)
         .map(e => ({ cod: e.cod, nombre: e.nombre, cr: e.creditos }));
       const opt = CATALOGO.filter(c => !c.codErrado).map(c => {
         const f = fichaSIA(c.cod, c.nombre);
@@ -62406,7 +62442,8 @@ function abrirDetalle(id) {
     </div>`;
 
   const dlg = $('#detalle');
-  dlg.showModal();
+  dlg.dataset.id = id;
+  if (!dlg.open) dlg.showModal();
 
   $('#segEstado').addEventListener('click', ev2 => {
     const b = ev2.target.closest('button'); if (!b) return;
@@ -62425,7 +62462,7 @@ function abrirDetalle(id) {
       const nombre = n.join('|');
       S.ranuras[id] = Object.assign({}, S.ranuras[id], { cod, nombre });
       // Créditos reales del SIA, si se conocen.
-      const e = LISTA_ELECTIVAS.find(x => x.cod === cod && x.nombre === nombre);
+      const e = electivasTodo().find(x => x.cod === cod && x.nombre === nombre);
       const f = fichaSIA(cod, nombre);
       const cr = (e && e.creditos != null) ? e.creditos : (f && f.creditos != null ? f.creditos : null);
       if (cr != null) { S.ranuras[id].cr = cr; if (nc0) nc0.value = cr; }
@@ -62790,7 +62827,7 @@ function pintarCatalogo() {
 /* --------------------------------------------------------------- electivas */
 /* Las de LIBRE ELECCIÓN, distintas de las optativas: llenan los 32 créditos
    que pueden cursarse con casi cualquier asignatura de la Universidad.        */
-const LISTA_ELECTIVAS = typeof ELECTIVAS === 'object' ? ELECTIVAS : [];
+const electivasTodo = () => (typeof ELECTIVAS === 'object' ? ELECTIVAS : []);
 
 const sinTildes = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
@@ -62799,7 +62836,7 @@ function pintarElectivas() {
   const orden = $('#ordEle').value;
   const soloDesc = $('#chkEleDesc').checked;
 
-  let items = LISTA_ELECTIVAS.slice();
+  let items = electivasTodo().slice();
   if ($('#chkEleVig').checked) items = items.filter(e => e.vigente !== false);
   if (soloDesc) items = items.filter(e => e.descripcion);
   if (q) items = items.filter(e =>
@@ -62816,10 +62853,10 @@ function pintarElectivas() {
   const usadas = new Map();
   for (const [slot, v] of Object.entries(S.ranuras)) if (v.cod) usadas.set(v.cod, slot);
 
-  const nVig = LISTA_ELECTIVAS.filter(e => e.vigente !== false).length;
-  const nCad = LISTA_ELECTIVAS.length - nVig;
+  const nVig = electivasTodo().filter(e => e.vigente !== false).length;
+  const nCad = electivasTodo().length - nVig;
   const fuenteEle = typeof ELECTIVAS_FUENTE === 'string' ? ELECTIVAS_FUENTE : 'electivas del Departamento de Electivas, contrastadas una a una con el SIA';
-  $('#ayudaEle').innerHTML = `${LISTA_ELECTIVAS.length} ${fuenteEle}${nCad ? `: <b>${nVig} vigentes</b> y ${nCad} caducada(s)` : ''}.
+  $('#ayudaEle').innerHTML = `${electivasTodo().length} ${fuenteEle}${nCad ? `: <b>${nVig} vigentes</b> y ${nCad} caducada(s)` : ''}.
     Mostrando <b>${items.length}</b>. Tienes <b>${libres.length} de ${cupos.length}</b> cupos de
     electiva sin asignar (${cupos.reduce((s, a) => s + creditos(a), 0)} créditos en total).
     ★ = el SIA la asocia al plan de ${esc(NOMBRE_CARRERA)}.`;
@@ -62869,7 +62906,7 @@ function asignarALibreEleccion(cod, nombre, creditos) {
 
 /** Atajo para las del Departamento de Electivas. */
 function asignarElectiva(cod) {
-  const e = LISTA_ELECTIVAS.find(x => x.cod === cod);
+  const e = electivasTodo().find(x => x.cod === cod);
   if (e) asignarALibreEleccion(e.cod, e.nombre, e.creditos);
 }
 
@@ -63052,7 +63089,7 @@ function panelHuecos(items, ses) {
       <button class="btn" data-hueco="${esc(o.cod)}|${combo.map(c => c.act.nombre + '=' + c.grupo.codigoGrupo).join(';')}">Añadir al horario</button>
     </div>`;
   return `<div class="panel hor-huecos">
-    <h3>¿Qué cabe en mis huecos? <span class="hint">— grupos de la oferta ${esc(OFERTA_SEM)} que no se cruzan con lo que ya tienes</span></h3>
+    <h3>¿Qué cabe en mis huecos? <span class="hint">— grupos de la oferta ${esc(semestreOferta())} que no se cruzan con lo que ya tienes</span></h3>
     ${ses.length ? `<div class="hueco-libres">${huecos.map(h => `<span><b>${DIAS_CORTOS[h.dia]}</b> ${h.libres.length ? h.libres.map(([i, f]) => hhmm(i) + '–' + hhmm(f)).join(', ') : 'sin huecos'}</span>`).join('')}
         ${[1, 2, 3, 4, 5, 6].filter(d => !huecos.some(h => h.dia === d)).length ? `<span><b>Libres todo el día:</b> ${[1, 2, 3, 4, 5, 6].filter(d => !huecos.some(h => h.dia === d)).map(d => DIAS_CORTOS[d]).join(', ')}</span>` : ''}</div>`
       : `<div class="hueco-libres"><span>Aún no hay nada en el horario: se muestra todo lo que tiene grupo con horario.</span></div>`}
@@ -63229,7 +63266,7 @@ function aplicarPropuesta(p, esc_) {
 
 function pintarHorario() {
   const cont = $('#horCont');
-  $('#horPeriodo').textContent = OFERTA_SEM ? `Periodo ${OFERTA_SEM} · consultado el ${typeof OFERTA_CONSULTADO === 'string' ? OFERTA_CONSULTADO : '?'}` : '';
+  $('#horPeriodo').textContent = semestreOferta() ? `Periodo ${semestreOferta()} · consultado el ${typeof OFERTA_CONSULTADO === 'string' ? OFERTA_CONSULTADO : '?'}` : '';
   if (!Object.keys(OFERTA_MAP).length) {
     cont.innerHTML = '<div class="hor-vacio">No hay oferta cargada. Genera <code>js/oferta.js</code> con <code>node herramientas/catalogo-sia.js sincronizar</code>.</div>';
     return;
@@ -63330,6 +63367,40 @@ function pintarRuta() {
     </div></div>`;
 }
 
+/* ------------------------------------------------- carga diferida de datos */
+/* La oferta del SIA, los profesores, las fichas y las electivas pesan varios MB
+   entre todos: si se cargaran con la página, la app tardaría en aparecer. Se
+   piden solo cuando hacen falta (al abrir una ficha, las Optativas, las
+   Electivas o el Horario). En los paquetes de dist/ ya vienen incrustados, así
+   que `asegurarDatos` no hace nada.                                          */
+const DATOS_PESADOS = {
+  oferta: () => typeof OFERTA === 'object',
+  losestudiantes: () => typeof LOSESTUDIANTES === 'object',
+  sia: () => typeof SIA === 'object',
+  electivas: () => typeof ELECTIVAS === 'object',
+};
+const _pedidos = {};
+
+/** Carga los archivos de datos que falten y ejecuta `luego` cuando estén. */
+function asegurarDatos(nombres, luego) {
+  const faltan = nombres.filter(n => DATOS_PESADOS[n] && !DATOS_PESADOS[n]());
+  if (!faltan.length) { luego(); return; }
+  const base = (CARRERA_APP.datosUrl || '../carreras/' + (CARRERA_APP.slug || '') + '/');
+  Promise.all(faltan.map(n => _pedidos[n] || (_pedidos[n] = new Promise((ok, mal) => {
+    const el = document.createElement('script');
+    // onload antes que src: si el archivo ya está en caché puede resolverse al instante.
+    el.onload = ok; el.onerror = () => mal(new Error('no se pudo cargar ' + n + '.js'));
+    el.src = base + n + '.js';
+    document.head.appendChild(el);
+  })))).then(luego).catch(e => {
+    console.error(e);
+    avisar('No se pudieron cargar los datos del SIA. Revisa tu conexión y recarga.');
+  });
+}
+
+/** Marca de «cargando…» para una vista mientras llegan sus datos. */
+const cargando = txt => `<div class="cargando"><span class="giro"></span>${esc(txt)}</div>`;
+
 /* ------------------------------------------------------------------- notas */
 function pintarNotas() {
   $('#notasCont').innerHTML = INCONSISTENCIAS.map(n =>
@@ -63337,13 +63408,25 @@ function pintarNotas() {
 }
 
 /* ------------------------------------------------------------------ router */
+/* Qué datos necesita cada pestaña. */
+const DATOS_VISTA = {
+  vCatalogo: ['sia', 'losestudiantes'],
+  vElectivas: ['electivas', 'sia'],
+  vHorario: ['oferta'],
+};
+
 function irA(id) {
   $$('.vista').forEach(v => v.hidden = v.id !== id);
   $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.vista === id));
   if (id === 'vPlan') pintarPlan();
-  if (id === 'vCatalogo') pintarCatalogo();
-  if (id === 'vElectivas') pintarElectivas();
-  if (id === 'vHorario') pintarHorario();
+  const pinta = { vCatalogo: pintarCatalogo, vElectivas: pintarElectivas, vHorario: pintarHorario }[id];
+  if (!pinta) return;
+  const necesita = DATOS_VISTA[id] || [];
+  const destino = { vCatalogo: '#catCont', vElectivas: '#eleCont', vHorario: '#horCont' }[id];
+  if (necesita.some(n => DATOS_PESADOS[n] && !DATOS_PESADOS[n]())) {
+    $(destino).innerHTML = cargando('Cargando los datos del SIA…');
+    asegurarDatos(necesita, pinta);
+  } else pinta();
 }
 
 function refrescar() {
@@ -63352,9 +63435,10 @@ function refrescar() {
   pintarRuta();
   pintarResumen();
   if (!$('#vPlan').hidden) pintarPlan();
-  if (!$('#vCatalogo').hidden) pintarCatalogo();
-  if (!$('#vElectivas').hidden) pintarElectivas();
-  if (!$('#vHorario').hidden) pintarHorario();
+  const listo = v => (DATOS_VISTA[v] || []).every(n => !DATOS_PESADOS[n] || DATOS_PESADOS[n]());
+  if (!$('#vCatalogo').hidden && listo('vCatalogo')) pintarCatalogo();
+  if (!$('#vElectivas').hidden && listo('vElectivas')) pintarElectivas();
+  if (!$('#vHorario').hidden && listo('vHorario')) pintarHorario();
   const m = metricas();
   $('#progGlobal').style.width = Math.min(100, m.total.hecho / m.total.meta * 100) + '%';
 

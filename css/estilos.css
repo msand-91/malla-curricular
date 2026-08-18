@@ -599,3 +599,8 @@ nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
 .pie-app img { border-radius: 8px; background: #fbfaf6; padding: 2px; }
 .pie-app a { color: var(--acento); text-decoration: none; font-weight: 600; }
 .pie-app a:hover { text-decoration: underline; }
+
+/* ------------------------------------------------- carga de datos --------- */
+.cargando { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 46px 16px; color: var(--texto-2); font-size: 13.5px; }
+.cargando .giro { width: 16px; height: 16px; border: 2px solid var(--borde); border-top-color: var(--acento); border-radius: 50%; animation: giro .7s linear infinite; }
+@keyframes giro { to { transform: rotate(360deg); } }

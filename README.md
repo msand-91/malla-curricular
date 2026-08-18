@@ -7,6 +7,9 @@ el horario con la oferta real del SIA**.
 
 - Portada con el selector de carrera: [index.html](index.html) → `/quimica/`, `/biologia/`, `/sistemas/`, `/veterinaria/`.
 - Sin servidor ni build: HTML + CSS + JS estáticos. El avance se guarda en el navegador, por carrera.
+- **Carga diferida:** la página baja ~180 KB y pinta la malla al instante; la oferta del SIA, los
+  profesores, las fichas y las electivas (1,5–2,7 MB entre todos) se piden solo al abrir la pestaña
+  que los usa. En los paquetes de `dist/` van incrustados.
 
 ## Estructura
 
@@ -22,6 +25,7 @@ carreras/<slug>/           lo específico de cada carrera:
    fuentes/  tests/  CONTEXTO.md
 herramientas/              scripts; todos aceptan --carrera=<slug>
 tests/correr.js            corre las pruebas de todas las carreras
+tests/carga.test.js        comprueba la carga diferida (arranca sin los datos pesados)
 dist/                      paquetes autocontenidos por carrera
 ```
 
