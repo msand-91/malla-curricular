@@ -39580,8 +39580,7 @@ const AREAS = {
    ----------------------------------------------------------------------------
    Las casillas «con opciones» (comp FP / DP) traen la asignatura que sugiere la
    malla; se puede sustituir por una equivalente del catálogo editándola.
-   pre / co: del grafo de la malla. Se han cargado las flechas que se leen sin
-   ambigüedad en la imagen disponible; el resto está PENDIENTE (ver notas).
+   pre / co: del grafo de la malla (todas las flechas de los semestres I–VIII).
    ========================================================================== */
 const PLAN_BASE = [
   /* ---------------------------- Semestre I ------------------------------- */
@@ -39618,9 +39617,9 @@ const PLAN_BASE = [
   { id: '1000045', cod: '1000045', nombre: 'Inglés II', cr: 3, sem: 3, comp: 'NV', area: 'idioma', pre: ['1000044'], co: [] },
 
   /* ---------------------------- Semestre IV ------------------------------ */
-  { id: '1000013', cod: '1000013', nombre: 'Probabilidad y estadística fundamental', cr: 3, sem: 4, comp: 'FP', area: 'probabilidad', pre: [], co: [],
+  { id: '1000013', cod: '1000013', nombre: 'Probabilidad y estadística fundamental', cr: 3, sem: 4, comp: 'FP', area: 'probabilidad', pre: ['1000005'], co: [],
     nota: 'Casilla «con opciones»: alternativa en el SIA, Probabilidad (2015178).' },
-  { id: '2015703', cod: '2015703', nombre: 'Ingeniería económica', cr: 3, sem: 4, comp: 'FP', area: 'economicas', pre: [], co: [],
+  { id: '2015703', cod: '2015703', nombre: 'Ingeniería económica', cr: 3, sem: 4, comp: 'FP', area: 'economicas', pre: ['1000005'], co: [],
     nota: 'Casilla «con opciones»: alternativa en el SIA, Ingeniería económica y análisis de riesgo (2025986).' },
   { id: '2025964', cod: '2025964', nombre: 'Matemáticas discretas II', cr: 4, sem: 4, comp: 'FP', area: 'ciencias_comp', pre: ['2025963'], co: [] },
   { id: '2016699', cod: '2016699', nombre: 'Estructuras de datos', cr: 3, sem: 4, comp: 'DO', area: 'software', pre: ['2016375'], co: [] },
@@ -39628,41 +39627,41 @@ const PLAN_BASE = [
   { id: '1000046', cod: '1000046', nombre: 'Inglés III', cr: 3, sem: 4, comp: 'NV', area: 'idioma', pre: ['1000045'], co: [] },
 
   /* ---------------------------- Semestre V ------------------------------- */
-  { id: '2025970', cod: '2025970', nombre: 'Modelos y simulación', cr: 3, sem: 5, comp: 'DP', area: 'modelos', pre: [], co: [] },
-  { id: '2015702', cod: '2015702', nombre: 'Gerencia y gestión de proyectos', cr: 3, sem: 5, comp: 'FP', area: 'economicas', pre: [], co: [],
+  { id: '2025970', cod: '2025970', nombre: 'Modelos y simulación', cr: 3, sem: 5, comp: 'DP', area: 'modelos', pre: ['1000013', '2016375', '1000006', '2025964'], co: [] },
+  { id: '2015702', cod: '2015702', nombre: 'Gerencia y gestión de proyectos', cr: 3, sem: 5, comp: 'FP', area: 'economicas', pre: ['2015703'], co: [],
     nota: 'Casilla «con opciones»: alternativa en el SIA, Diseño, gestión y evaluación de proyectos (2016028).' },
-  { id: '2025967', cod: '2025967', nombre: 'Redes de computadores', cr: 3, sem: 5, comp: 'DO', area: 'infraestructura', pre: [], co: [] },
-  { id: '2016701', cod: '2016701', nombre: 'Ingeniería de software I', cr: 3, sem: 5, comp: 'DO', area: 'software', pre: ['2016699'], co: [] },
-  { id: '2015174', cod: '2015174', nombre: 'Introducción a la teoría de la computación', cr: 4, sem: 5, comp: 'FO', area: 'ciencias_comp', pre: ['2025964'], co: [] },
+  { id: '2025967', cod: '2025967', nombre: 'Redes de computadores', cr: 3, sem: 5, comp: 'DO', area: 'infraestructura', pre: ['1000017', '2016699', '2016697'], co: [] },
+  { id: '2016701', cod: '2016701', nombre: 'Ingeniería de software I', cr: 3, sem: 5, comp: 'DO', area: 'software', pre: ['2016699', '2016703', '2016353'], co: [] },
+  { id: '2015174', cod: '2015174', nombre: 'Introducción a la teoría de la computación', cr: 4, sem: 5, comp: 'FO', area: 'ciencias_comp', pre: ['2025963'], co: [] },
   { id: '1000047', cod: '1000047', nombre: 'Inglés IV', cr: 3, sem: 5, comp: 'NV', area: 'idioma', pre: ['1000046'], co: [] },
 
   /* ---------------------------- Semestre VI ------------------------------ */
-  { id: '2025971', cod: '2025971', nombre: 'Optimización', cr: 3, sem: 6, comp: 'DP', area: 'modelos', pre: [], co: [] },
-  { id: '2025982', cod: '2025982', nombre: 'Sistemas de información', cr: 3, sem: 6, comp: 'DP', area: 'infraestructura', pre: [], co: [] },
-  { id: '2015970', cod: '2015970', nombre: 'Métodos numéricos', cr: 3, sem: 6, comp: 'FP', area: 'ciencias_comp', pre: [], co: [],
+  { id: '2025971', cod: '2025971', nombre: 'Optimización', cr: 3, sem: 6, comp: 'DP', area: 'modelos', pre: ['2025970'], co: [] },
+  { id: '2025982', cod: '2025982', nombre: 'Sistemas de información', cr: 3, sem: 6, comp: 'DP', area: 'infraestructura', pre: ['2016703', '2016353'], co: [] },
+  { id: '2015970', cod: '2015970', nombre: 'Métodos numéricos', cr: 3, sem: 6, comp: 'FP', area: 'ciencias_comp', pre: ['1000006'], co: [],
     nota: 'Casilla «con opciones»: alternativa en el SIA, Análisis numérico I (2019072).' },
-  { id: '2016702', cod: '2016702', nombre: 'Ingeniería de software II', cr: 3, sem: 6, comp: 'DO', area: 'software', pre: ['2016701'], co: [] },
-  { id: '2016696', cod: '2016696', nombre: 'Algoritmos', cr: 3, sem: 6, comp: 'FO', area: 'ciencias_comp', pre: ['2015174'], co: [] },
+  { id: '2016702', cod: '2016702', nombre: 'Ingeniería de software II', cr: 3, sem: 6, comp: 'DO', area: 'software', pre: ['2016701', '2025967'], co: [] },
+  { id: '2016696', cod: '2016696', nombre: 'Algoritmos', cr: 3, sem: 6, comp: 'FO', area: 'ciencias_comp', pre: ['2015174', '1000013', '2025964', '2016699'], co: [] },
   { id: '2016707', cod: '2016707', nombre: 'Sistemas operativos', cr: 3, sem: 6, comp: 'DO', area: 'infraestructura', pre: ['2016697'], co: [] },
 
   /* ---------------------------- Semestre VII ----------------------------- */
-  { id: '2025969', cod: '2025969', nombre: 'Modelos estocásticos y simulación en computación y comunicaciones', cr: 3, sem: 7, comp: 'DO', area: 'modelos', pre: [], co: [] },
-  { id: '2025983', cod: '2025983', nombre: 'Arquitectura de infraestructura y gobierno de TICs', cr: 3, sem: 7, comp: 'DO', area: 'infraestructura', pre: [], co: [] },
-  { id: '2025994', cod: '2025994', nombre: 'Teoría de la información y sistemas de comunicación', cr: 3, sem: 7, comp: 'DP', area: 'infraestructura', pre: [], co: [],
+  { id: '2025969', cod: '2025969', nombre: 'Modelos estocásticos y simulación en computación y comunicaciones', cr: 3, sem: 7, comp: 'DO', area: 'modelos', pre: ['2025971'], co: [] },
+  { id: '2025983', cod: '2025983', nombre: 'Arquitectura de infraestructura y gobierno de TICs', cr: 3, sem: 7, comp: 'DO', area: 'infraestructura', pre: ['2016702'], co: [] },
+  { id: '2025994', cod: '2025994', nombre: 'Teoría de la información y sistemas de comunicación', cr: 3, sem: 7, comp: 'DP', area: 'infraestructura', pre: ['1000013', '2025967'], co: [],
     nota: 'La malla la llama «Información y comunicaciones».' },
   { id: '2016716', cod: '2016716', nombre: 'Arquitectura de software', cr: 3, sem: 7, comp: 'DO', area: 'software', pre: ['2016702'], co: [] },
   { id: '2025995', cod: '2025995', nombre: 'Introducción a los sistemas inteligentes', cr: 3, sem: 7, comp: 'DP', area: 'inteligentes', pre: ['2016696'], co: [],
     nota: 'La malla la llama «Sistemas inteligentes».' },
-  { id: '2025966', cod: '2025966', nombre: 'Lenguajes de programación', cr: 3, sem: 7, comp: 'DP', area: 'software', pre: [], co: [] },
+  { id: '2025966', cod: '2025966', nombre: 'Lenguajes de programación', cr: 3, sem: 7, comp: 'DP', area: 'software', pre: ['2016699', '2015174'], co: [] },
 
   /* ---------------------------- Semestre VIII ---------------------------- */
   { id: '2024045', cod: '2024045', nombre: 'Taller de proyectos interdisciplinarios', cr: 3, sem: 8, comp: 'DP', area: 'contexto', pre: [], co: [],
-    nota: 'La malla lo llama «Taller interdisciplinario de creación y gestión».' },
-  { id: '2025972', cod: '2025972', nombre: 'Introducción a la criptografía y a la seguridad de la información', cr: 3, sem: 8, comp: 'DP', area: 'infraestructura', pre: [], co: [],
+    preEsp: 'Requisito especial (*) según la malla: consúltalo con la coordinación (habitualmente, un porcentaje del plan aprobado)', nota: 'La malla lo llama «Taller interdisciplinario de creación y gestión».' },
+  { id: '2025972', cod: '2025972', nombre: 'Introducción a la criptografía y a la seguridad de la información', cr: 3, sem: 8, comp: 'DP', area: 'infraestructura', pre: ['2016696'], co: [],
     nota: 'La malla la llama «Codificación, criptografía y seguridad de la información».' },
-  { id: '2016722', cod: '2016722', nombre: 'Computación paralela y distribuida', cr: 3, sem: 8, comp: 'DO', area: 'infraestructura', pre: ['2016707'], co: [],
+  { id: '2016722', cod: '2016722', nombre: 'Computación paralela y distribuida', cr: 3, sem: 8, comp: 'DO', area: 'infraestructura', pre: ['2016696'], co: [],
     nota: 'La malla imprime el código 2025968, que no existe en el plan 2A74 del SIA; el SIA la tiene como 2016722 (disciplinar obligatoria).' },
-  { id: '2025960', cod: '2025960', nombre: 'Computación visual', cr: 3, sem: 8, comp: 'DP', area: 'comp_aplicada', pre: [], co: [],
+  { id: '2025960', cod: '2025960', nombre: 'Computación visual', cr: 3, sem: 8, comp: 'DP', area: 'comp_aplicada', pre: ['2016696'], co: [],
     nota: 'La malla la llama «Computación aplicada».' },
   { id: 'ELE_8_1', cod: null, nombre: 'Electiva (libre elección)', cr: 4, sem: 8, comp: 'LE', area: null, pre: [], co: [], ranura: ['libre'] },
 
@@ -39782,7 +39781,7 @@ const GRUPOS_DISCIPLINARES = ['software', 'infraestructura', 'inteligentes', 'mo
    Notas sobre los datos y sus fuentes
    ========================================================================== */
 const INCONSISTENCIAS = [
-  { asig: 'Prerrequisitos: parcialmente cargados', detalle: 'La malla 2A74 dibuja los prerrequisitos con flechas y círculos numerados. De la imagen disponible se transcribieron las cadenas que se leen sin ambigüedad: Matemáticas Básicas → Cálculo diferencial → Cálculo integral → Cálculo en varias variables; Cálculo diferencial → Fundamentos de mecánica y Álgebra lineal; Cálculo integral → Fundamentos de electricidad y magnetismo; Programación → Programación orientada a objetos → Estructuras de datos y Bases de datos; Estructuras de datos → Ingeniería de software I → II → Arquitectura de software; Introducción a la ingeniería → Elementos de computadores → Arquitectura de computadores → Sistemas operativos → Computación paralela; Matemáticas discretas I → II → Introducción a la teoría de la computación → Algoritmos → Sistemas inteligentes. Faltan por confirmar las flechas de Probabilidad, Redes, Modelos y simulación, Optimización, Métodos numéricos, Sistemas de información, Información y comunicaciones, Lenguajes, Criptografía y el Taller: hasta entonces se muestran sin requisito.' },
+  { asig: 'Prerrequisitos: transcritos del grafo de la malla', detalle: 'La malla 2A74 dibuja los prerrequisitos con círculos numerados (el número a la derecha de una casilla la identifica; los que entran por la izquierda son sus requisitos). Se transcribieron todas las flechas de los semestres I a VIII: p. ej. Redes de computadores exige Fundamentos de electricidad y magnetismo, Estructuras de datos y Arquitectura de computadores; Modelos y simulación exige Probabilidad, Programación orientada a objetos, Cálculo en varias variables y Matemáticas discretas II; Algoritmos exige Introducción a la teoría de la computación, Probabilidad, Matemáticas discretas II y Estructuras de datos, y es a su vez requisito de Sistemas inteligentes, Criptografía, Computación paralela y Computación visual; Ingeniería de software II exige Ingeniería de software I y Redes, y es requisito de Arquitectura de software y de Arquitectura de infraestructura. Dos dudas: Matemáticas discretas I no tiene flecha de entrada legible (se deja sin requisito) y el Taller de proyectos lleva un asterisco de «requisito especial» que la malla no detalla. Los semestres IX y X son libre elección y trabajo de grado.' },
   { asig: 'Sin opciones / con opciones', detalle: 'La malla marca cada casilla como fundamentación (B) o disciplinar (C), y distingue «sin opciones» (fijas: 15 + 54) y «con opciones» (36 + 27, sustituibles por una equivalente). El SIA, en cambio, clasifica las asignaturas del plan como fund. obligatoria (4), fund. optativa (20), disciplinar obligatoria (13) y disciplinar optativa (38); la app sigue al SIA para el componente de cada asignatura, y las casillas «con opciones» traen la asignatura que la malla sugiere, con su alternativa anotada en la ficha. Cambiar una casilla por su alternativa: «Editar asignatura» → código y nombre.' },
   { asig: 'Créditos por componente', detalle: 'Malla: fundamentación 51, disciplinar 81, libre elección 33 = 165 (la cabecera imprime también «167» y «164» en distintas versiones). Con la tipología del SIA: fund. sin opciones 15 (Fund. de mecánica, Fund. de electricidad y magnetismo, Introducción a la teoría de la computación, Algoritmos), fund. con opciones 36, disciplinar obligatoria 39 (13 asignaturas), disciplinar con opciones 36, trabajo de grado 6, libre elección 33. Nivelación 20 (Matemáticas Básicas 4, Lecto-Escritura 4, Inglés I–IV 12) no cuenta.' },
   { asig: 'Códigos que difieren entre la malla y el SIA', detalle: 'Computación paralela y distribuida: la malla imprime 2025968; en el plan 2A74 del SIA está como 2016722 (se usa este). «Información y comunicaciones» es Teoría de la información y sistemas de comunicación (2025994); «Computación aplicada» es Computación visual (2025960); «Sistemas inteligentes» es Introducción a los sistemas inteligentes (2025995); «Taller interdisciplinario de creación y gestión» es Taller de proyectos interdisciplinarios (2024045); «Programación» es Programación de computadores (2015734).' },
