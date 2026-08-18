@@ -74,17 +74,37 @@ const portada = `<!DOCTYPE html>
   .carrera .ir { position: relative; margin-top: auto; padding-top: 10px; font-size: 13px; font-weight: 650; color: var(--c); }
   .portada .nota { margin-top: 28px; font-size: 12.5px; color: var(--texto-2); max-width: 640px; }
   .portada .nota a { color: var(--texto-2); }
+  .cabecera-marca { display: flex; align-items: center; gap: 18px; margin-bottom: 4px; }
+  .cabecera-marca .quimisand { width: 84px; height: 84px; border-radius: 22px; background: #fbfaf6; padding: 6px; box-shadow: var(--sombra); flex: none; object-fit: contain; }
+  .contacto { margin-top: 26px; display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 12px 16px; font-size: 13.5px; box-shadow: var(--sombra); max-width: 640px; }
+  .contacto img { border-radius: 12px; background: #fbfaf6; padding: 3px; flex: none; }
+  .contacto b { display: block; margin-bottom: 2px; }
+  .contacto a { color: var(--acento, #2563c4); font-weight: 600; text-decoration: none; }
+  .contacto a:hover { text-decoration: underline; }
+  @media (max-width: 560px) { .cabecera-marca { align-items: flex-start; } .cabecera-marca .quimisand { width: 60px; height: 60px; } }
 </style>
 </head>
 <body>
 <main class="portada">
-  <div class="marca"><i></i> Universidad Nacional de Colombia · Sede Bogotá</div>
-  <h1>Mallas curriculares <span>interactivas</span></h1>
+  <div class="cabecera-marca">
+    <img class="quimisand" src="img/quimisand.png" alt="Quimisand" width="84" height="84">
+    <div>
+      <div class="marca"><i></i> Quimisand · Universidad Nacional de Colombia · Sede Bogotá</div>
+      <h1>Mallas curriculares <span>interactivas</span></h1>
+    </div>
+  </div>
   <p class="sub">Elige tu carrera. Marca lo aprobado, mira qué puedes inscribir, planea los semestres que faltan y arma el horario con la oferta real del SIA.</p>
   <div class="carreras">
 ${conTema.map(tarjeta).join('\n')}
   </div>
   <p class="nota">El avance se guarda en tu navegador, por carrera. Datos públicos del SIA, sin sesión ni credenciales; confirma siempre en el SIA antes de inscribir.</p>
+  <section class="contacto">
+    <img src="img/quimisand.png" alt="" width="44" height="44">
+    <div>
+      <b>¿Sugerencias, errores o necesitas ayuda?</b>
+      <div>Matías Sandoval · <a href="https://wa.me/573223513477" target="_blank" rel="noopener">322 351 3477</a> · <a href="mailto:msandovalsu@unal.edu.co">msandovalsu@unal.edu.co</a></div>
+    </div>
+  </section>
 </main>
 </body>
 </html>

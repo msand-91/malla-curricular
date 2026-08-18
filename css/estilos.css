@@ -593,3 +593,9 @@ nav.tabs button[aria-selected="true"] { border-bottom-color: var(--acento); }
 .ruta-panel .meta { font-size: 12.5px; color: var(--texto-2); margin: 0 0 8px; }
 .ruta-panel .req-lista .r.no { opacity: .6; }
 #lblRuta select { max-width: 260px; }
+
+/* ------------------------------------------------------------- pie ------- */
+.pie-app { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px 16px 26px; font-size: 12.5px; color: var(--texto-2); flex-wrap: wrap; text-align: center; }
+.pie-app img { border-radius: 8px; background: #fbfaf6; padding: 2px; }
+.pie-app a { color: var(--acento); text-decoration: none; font-weight: 600; }
+.pie-app a:hover { text-decoration: underline; }

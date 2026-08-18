@@ -29,7 +29,15 @@ const PAGINA = path.join(RAIZ, SLUG, 'index.html');   // generada por herramient
 // Las rutas del index son relativas a <slug>/ (../css/…, ../carreras/…).
 const leer = p => fs.readFileSync(path.join(RAIZ, SLUG, p), 'utf8');
 
-const html = fs.readFileSync(PAGINA, 'utf8');
+/* --- Imágenes: en el paquete van embebidas como data: URI ------------------- */
+const conImagenes = h => h.replace(/src="([^"]+\.(png|jpg|jpeg|svg))"/g, (m, ruta, ext) => {
+  try {
+    const b = fs.readFileSync(path.join(RAIZ, SLUG, ruta));
+    return `src="data:image/${ext === 'svg' ? 'svg+xml' : ext === 'jpg' ? 'jpeg' : ext};base64,${b.toString('base64')}"`;
+  } catch { return m; }
+});
+
+const html = conImagenes(fs.readFileSync(PAGINA, 'utf8'));
 
 /* --- Título y cuerpo del index --------------------------------------------- */
 const titulo = (html.match(/<title>([^<]*)<\/title>/) || [, 'Malla Curricular'])[1];
